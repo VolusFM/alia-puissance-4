@@ -15,7 +15,7 @@ gameover('Draw') :- board(Board), isBoardFull(Board). % the Board is fully insta
 %%%% are instanciated: true e.g. for [x,x,o,o,x,o] false for
 %%%% [x,x,o,o,_G125,x]
 isColFull([]).
-isColFull([H|T]):- nonvar(H), isColFull(T).
+isColFull([H|T]):- nonvar(H), isColFull(T). %%%%%% a changer
 
 isBoardFull(B):-
     nth0(0,B,Col0), isColFull(Col0),
@@ -26,7 +26,7 @@ isBoardFull(B):-
     nth0(5,B,Col5), isColFull(Col5),
     nth0(6,B,Col6), isColFull(Col6).
 
-%%%%winning condition
+%%%% Winning condition
 winner(Board, Winner) :- fourVertical(Board, Winner).
 winner(Board, Winner) :- fourHorizontal(Board, Winner).
 winner(Board, Winner) :- fourDiagonalUp(Board, Winner).
@@ -59,6 +59,29 @@ fourDiagonalUp(Board, P):- append(_,[C1, C2, C3, C4|_], Board),
     append(_, [P|X3], C3),
     append(_, [P|X4], C4),
     length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1-1, L3 is L1-2, L4 is L1-3.
+
+insertElemInCol([H|_], Player) :- var(H), H is Player.
+insertElemInCol([H|T], Player) :- nonvar(H), insertElemInCol(T, Player).
+
+%%%% Artificial intelligence: choose in a Board the index to play for Player (_)
+%%%% This AI plays randomly and does not care who is playing: it chooses a free position
+%%%% in the Board (an element which is an free variable).
+ia(Board, Index,Player) :- repeat, Index is random(7), nth0(Index, Board, Col), not(isColFull(Col)),
+    insertElemInCol(Col, Player), !.
+
+
+%%%% Recursive predicate for playing the game.
+% The game is over, we use a cut to stop the proof search, and display the winner/board.
+play(_):- gameover(Winner), !, write('Game is Over. Winner: '), writeln(Winner), displayBoard.
+% The game is not over, we play the next turn
+play(Player):-  write('New turn for:'), writeln(Player),
+		board(Board), % instanciate the board from the knowledge base
+                displayBoard, % print it
+                ia(Board, Move,Player), % ask the AI for a move, that is, an index for the Player
+                playMove(Board,Move,NewBoard,Player), % Play the move and get the result in a new Board
+                applyIt(Board, NewBoard), % Remove the old board from the KB and store the new one
+                changePlayer(Player,NextPlayer), % Change the player before next turn
+                play(NextPlayer). % next turn!
 
 
 %%%% Play a Move, the new Board will be the same, but one value will be instanciated with the Move
@@ -98,4 +121,11 @@ displayBoard:-
     writeln('*-------------------*').
 
 %%%%% Start the game!
-init :- length(Board,7), assert(board(Board)).%play('x').
+% fill the columns with '.'
+% https://stackoverflow.com/questions/16431465/prolog-fill-list-with-n-elements
+fill([], _, '.').
+fill([X|Xs], X, N) :- succ(N0, N), fill(Xs, X, N0).
+
+fillBoard([H|T]) :- fill([H|],H,6), fillBoard(T).
+
+init :- length(Board,7), assert(board(Board)), play('x').
