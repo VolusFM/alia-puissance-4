@@ -12,7 +12,8 @@ gameover(Winner) :- board(Board), winner(Board, Winner), !. % There exists a win
 gameover('Draw') :- board(Board), isBoardFull(Board). % the Board is fully instanciated (no free variable): Draw.
 
 %%%% Recursive predicate that checks if all the elements of the List (a board)
-%%%% are instanciated: true e.g. for [x,x,o,o,x,o,x,x,o] false for [x,x,o,o,_G125,o,x,x,o]
+%%%% are instanciated: true e.g. for [x,x,o,o,x,o] false for
+%%%% [x,x,o,o,_G125,x]
 isColFull([]).
 isColFull([H|T]):- nonvar(H), isColFull(T).
 
@@ -24,6 +25,41 @@ isBoardFull(B):-
     nth0(4,B,Col4), isColFull(Col4),
     nth0(5,B,Col5), isColFull(Col5),
     nth0(6,B,Col6), isColFull(Col6).
+
+%%%%winning condition
+winner(Board, Winner) :- fourVertical(Board, Winner).
+winner(Board, Winner) :- fourHorizontal(Board, Winner).
+winner(Board, Winner) :- fourDiagonalUp(Board, Winner).
+winner(Board, Winner) :- fourDiagonalDown(Board, Winner).
+
+%%%% Test if there is column with four adjacent tokens of the same color.
+fourVertical(Board, P):- append(_, [C|_], Board),
+    append(_, [P,P,P,P|_], C).
+
+%%%% Test if there are four columns with a line of four adjacent tokens of the same color.
+fourHorizontal(Board, P) :- append(_, [C1, C2, C3, C4|_], Board),
+    append(_, [P|X1], C1),
+    append(_, [P|X2], C2),
+    append(_, [P|X3], C3),
+    append(_, [P|X4], C4),
+    length(X1, L), length(X2, L), length(X3, L), length(X4, L).
+
+%%%% Test if there are four columns with a diagonal of four adjacent tokens of the same color (going down).
+fourDiagonalDown(Board, P):- append(_, [C1, C2, C3, C4|_], Board),
+    append(_, [P|X1], C1),
+    append(_, [P|X2], C2),
+    append(_, [P|X3], C3),
+    append(_, [P|X4], C4),
+    length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1+1, L3 is L1+2, L4 is L1+3.
+
+%%%%% Test if there are four columns with a diagonal of four adjacent tokens of the same color (going up).
+fourDiagonalUp(Board, P):- append(_,[C1, C2, C3, C4|_], Board),
+    append(_, [P|X1], C1),
+    append(_, [P|X2], C2),
+    append(_, [P|X3], C3),
+    append(_, [P|X4], C4),
+    length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1-1, L3 is L1-2, L4 is L1-3.
+
 
 %%%% Play a Move, the new Board will be the same, but one value will be instanciated with the Move
 playMove(Board,Move,NewBoard,Player) :- Board=NewBoard,  nth0(Move,NewBoard,Player).
