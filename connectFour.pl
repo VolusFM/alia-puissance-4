@@ -11,6 +11,23 @@
 gameover(Winner) :- board(Board), winner(Board, Winner), !. % There exists a winning configuration: We cut!
 gameover('Draw') :- board(Board), isBoardFull(Board). % the Board is fully instanciated (no free variable): Draw.
 
+%%%% Recursive predicate that checks if all the elements of the List (a board)
+%%%% are instanciated: true e.g. for [x,x,o,o,x,o,x,x,o] false for [x,x,o,o,_G125,o,x,x,o]
+isColFull([]).
+isColFull([H|T]):- nonvar(H), isColFull(T).
+
+isBoardFull(B):-
+    nth0(0,B,Col0), isColFull(Col0),
+    nth0(1,B,Col1), isColFull(Col1),
+    nth0(2,B,Col2), isColFull(Col2),
+    nth0(3,B,Col3), isColFull(Col3),
+    nth0(4,B,Col4), isColFull(Col4),
+    nth0(5,B,Col5), isColFull(Col5),
+    nth0(6,B,Col6), isColFull(Col6).
+
+%%%% Play a Move, the new Board will be the same, but one value will be instanciated with the Move
+playMove(Board,Move,NewBoard,Player) :- Board=NewBoard,  nth0(Move,NewBoard,Player).
+
 %%%% Remove old board/save new on in the knowledge base
 applyIt(Board,NewBoard) :- retract(board(Board)), assert(board(NewBoard)).
 
