@@ -24,25 +24,25 @@ printVal(N) :- board(B), nth0(N,B,Val), var(Val), write('?'), !.
 printVal(N) :- board(B), nth0(N,B,Val), write(Val).
 
 %%%% Print the line at index
-printLine(index) :-  board(B),
-    nth0(0,B,Col0), nth0(index,Col0,Val),printVal(Val),
-    nth0(1,B,Col1), nth0(index,Col1,Val),printVal(Val),
-    nth0(2,B,Col2), nth0(index,Col2,Val),printVal(Val),
-    nth0(3,B,Col3), nth0(index,Col3,Val),printVal(Val),
-    nth0(4,B,Col4), nth0(index,Col4,Val),printVal(Val),
-    nth0(5,B,Col5), nth0(index,Col5,Val),printVal(Val),
-    nth0(6,B,Col6), nth0(index,Col6,Val),printVal(Val).
+printLine(Index) :-  board(B),
+    write(' '), nth0(0,B,Col0), nth0(Index,Col0,Val),printVal(Val), write(' '),
+    write(' '), nth0(1,B,Col1), nth0(Index,Col1,Val),printVal(Val), write(' '),
+    write(' '), nth0(2,B,Col2), nth0(Index,Col2,Val),printVal(Val), write(' '),
+    write(' '), nth0(3,B,Col3), nth0(Index,Col3,Val),printVal(Val), write(' '),
+    write(' '), nth0(4,B,Col4), nth0(Index,Col4,Val),printVal(Val), write(' '),
+    write(' '), nth0(5,B,Col5), nth0(Index,Col5,Val),printVal(Val), write(' '),
+    write(' '), nth0(6,B,Col6), nth0(Index,Col6,Val),printVal(Val), write(' ').
 
 %%%% Display the board
 displayBoard:-
-    writeln('*----------*'),
+    writeln('*-------------------*'),
     printLine(0), writeln(''),
     printLine(1), writeln(''),
     printLine(2), writeln(''),
     printLine(3), writeln(''),
     printLine(4), writeln(''),
     printLine(5), writeln(''),
-    writeln('*----------*').
+    writeln('*-------------------*').
 
 %%%%% Start the game!
 init :- length(Board,7), assert(board(Board)).%play('x').
