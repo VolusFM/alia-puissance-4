@@ -9,10 +9,12 @@ evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Record, BestMove
     update(Move, Value, Record, NewRecord),
     evaluate_and_choose(Moves, Board, Player, Depth, MaxMin, NewRecord, BestMove).
 
+%no possible moves to do
+%TODO: implement draw win or lose when no moves
 evaluate_and_choose([], Board, Player, Depth, MaxMin, Record, Record).
 
 minimax(0, Board, Player, MaxMin, Move, Value):-
-    value(Board, ValueBoard),
+	value(Board, ValueBoard),
     Value is ValueBoard*MaxMin.
 
 
@@ -25,6 +27,7 @@ minimax(Depth, Board, Player, MaxMin, Move, Value) :-
     MinMax is -MaxMin,
     evaluate_and_choose(Moves, Board, NewDepth, MinMax, (nil, -1000),
                         (Move, Value)).
+
 update(Move, Value, (Move1, Value1), (Move1, Value1)):-
     Value =< Value1.
 
@@ -33,25 +36,36 @@ update(Move, Value, (Move1, Value1), (Move, Value)) :-
 
 %TODO: Define the heuristic
 %x is positive, o is negative
-value(Board, 1).
+value(Board, Value):-
+	set(myBoard,Board),
+	findall([Row, Column], isEmpty(Row,Column, Board), EmptyCoords),
+	sumValues(EmptyCoords,Board, Value).
 
-%TODO: move to other file
-possible_move(Board, Move) :-
-	validColumn(Move),
-	not(isColFull(nth0(0,Board,Col0))).
+sumValues([],Board,0).
 
-validColumn(0).
-validColumn(1).
-validColumn(2).
-validColumn(3).
-validColumn(4).
-validColumn(5).
-validColumn(6).
+sumValues([[Row, Column] | T], Board, Value) :-
+	sumValues(T, Board, NewValue),
+	rowColumnValue(Row, Column, Board, ValueCase),
+	Value is NewValue + ValueCase.
 
-%TODO: use the one in the other file
-isColFull(A):-
-	fail,
-	!.
+rowColumnValue(Row,Column,Board,2).
+
+
+
+isEmpty(Row, Column, Board) :-
+	nth0(Row, Board, Element),
+	nth0(Column, Element, '.').
+
+
+%set(myBoard,[['.','x','.','.','.','.','.'],
+%			['.','x','.','.','.','.','.'],
+%			['.','.','x','.','.','.','.'],
+%			['.','.','.','.','.','.','.'],
+%			['.','.','.','.','.','.','.'],
+%			['.','.','.','.','.','.','.']]).
+
+set(myBoard,[['.','x','x','x','.','.','.']])
+
 
 
 
