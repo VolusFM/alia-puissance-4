@@ -5,11 +5,9 @@
 % eg column1(x,o,_,_,_,_) after the second round
 % until the board is completely instanciated or someone wins
 
-:- dynamic board/1.
-
 %%%% Test is the game is finished %%%
-gameover(Winner) :- board(Board), winner(Board, Winner), !. % There exists a winning configuration: We cut!
-gameover('Draw') :- board(Board), isBoardFull(Board). % the Board is fully instanciated (no free variable): Draw.
+gameover(Winner, Board) :- winner(Board, Winner), !. % There exists a winning configuration: We cut!
+gameover('Draw', Board) :- isBoardFull(Board). % the Board is fully instanciated (no free variable): Draw.
 
 %%%% Recursive predicate that checks if all the elements of the List (a board)
 %%%% are instanciated: true e.g. for [x,x,o,o,x,o] false for
@@ -38,65 +36,78 @@ winner(Board,Winner) :- fourDiagonalDown(Board, Winner).
 %Board=[[_ _ _ _],[_ _ _]]
 fourVertical(Board, P):-
     append(_, [C|_], Board),
-    append(_, [A,A,A,A|_], C),
-    A==P.
+    append(_, [A,B,D,E|_], C),
+    A==P, B==P, D==P, E==P.
 
 %%%% Test if there are four columns with a line of four adjacent tokens of the same color.
 fourHorizontal(Board, P) :- append(_, [C1, C2, C3, C4|_], Board),
     append(_, [A|X1], C1),
-    append(_, [A|X2], C2),
-    append(_, [A|X3], C3),
-    append(_, [A|X4], C4),
-    A==P,
+    append(_, [B|X2], C2),
+    append(_, [D|X3], C3),
+    append(_, [E|X4], C4),
+    A==P, B==P, D==P, E==P,
     length(X1, L), length(X2, L), length(X3, L), length(X4, L).
 
 %%%% Test if there are four columns with a diagonal of four adjacent tokens of the same color (going down).
 fourDiagonalDown(Board, P):- append(_, [C1, C2, C3, C4|_], Board),
     append(_, [A|X1], C1),
-    append(_, [A|X2], C2),
-    append(_, [A|X3], C3),
-    append(_, [A|X4], C4),
-    A==P,
+    append(_, [B|X2], C2),
+    append(_, [D|X3], C3),
+    append(_, [E|X4], C4),
+    A==P, B==P, D==P, E==P,
     length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1+1, L3 is L1+2, L4 is L1+3.
 
 %%%%% Test if there are four columns with a diagonal of four adjacent tokens of the same color (going up).
 fourDiagonalUp(Board, P):- append(_,[C1, C2, C3, C4|_], Board),
     append(_, [A|X1], C1),
-    append(_, [A|X2], C2),
-    append(_, [A|X3], C3),
-    append(_, [A|X4], C4),
-    A==P,
+    append(_, [B|X2], C2),
+    append(_, [D|X3], C3),
+    append(_, [E|X4], C4),
+    A==P, B==P, D==P, E==P,
 length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1-1, L3 is L1-2, L4 is L1-3.
 
-insertElemInCol([H|_], Player) :- var(H), H = Player.
-insertElemInCol([H|T], Player) :- nonvar(H), insertElemInCol(T, Player).
 
 %%%% Artificial intelligence: choose in a Board the index to play for Player (_)
 %%%% This AI plays randomly and does not care who is playing: it chooses a free position
 %%%% in the Board (an element which is an free variable).
-ia(Board, Index,Player) :- repeat, Index is random(7), nth0(Index, Board, Col), not(isColFull(Col)),
-    insertElemInCol(Col, Player), !.
+ia(Board, Index) :-
+	repeat, Index is random(7),
+	nth0(Index, Board, Col),
+	not(isColFull(Col)),!.
 
 
 %%%% Recursive predicate for playing the game.
 % The game is over, we use a cut to stop the proof search, and display the winner/board.
-play(Player):- changePlayer(Player,NextPlayer),gameover(NextPlayer), !, write('Game is Over. Winner: '), writeln(NextPlayer), displayBoard.
+play(Player, Board):- changePlayer(Player,NextPlayer),gameover(NextPlayer, Board), !, write('Game is Over. Winner: '),
+	writeln(NextPlayer), displayBoard(Board).
 % The game is not over, we play the next turn
-play(Player):-  write('New turn for: '), writeln(Player),
-		board(Board), % instanciate the board from the knowledge base
-                displayBoard, % print it
-                ia(Board, Move,Player), % ask the AI for a move, that is, an index for the Player
-                playMove(Board,Move,NewBoard,Player), % Play the move and get the result in a new Board
-                applyIt(Board, NewBoard), % Remove the old board from the KB and store the new one
-                changePlayer(Player,NextPlayer), % Change the player before next turn
-                play(NextPlayer). % next turn!
+play(Player, Board):-  write('New turn for: '), writeln(Player),
+		displayBoard(Board), % print it
+		ia(Board, Move), % ask the AI for a move, that is, an index for the Player
+		playMove(Board,Move,NewBoard,Player), % Play the move and get the result in a new Board
+		changePlayer(Player,NextPlayer), % Change the player before next turn
+		play(NextPlayer, NewBoard). % next turn!
 
+%No moves possible
+play(Player, Board):-
+	gameover('Draw', Board).
 
 %%%% Play a Move, the new Board will be the same, but one value will be instanciated with the Move
-playMove(Board,Move,NewBoard,Player) :- Board=NewBoard,  nth0(Move,NewBoard,Player). % pb avec nth0 !!!
+playMove(Board, Move, NewBoard, Player) :-
+	NewBoard = Board,
+	nth0(Move, NewBoard, Column),
+	insertToken(Player, Column),
+	nth0(Move, NewBoard, Column).
 
-%%%% Remove old board/save new on in the knowledge base
-applyIt(Board,NewBoard) :- retract(board(Board)), assert(board(NewBoard)).
+%insert token in column
+insertToken(Player, [H|_]) :-
+	var(H),
+	H = Player.
+
+insertToken(Player, [H|T]):-
+	nonvar(H),
+	insertToken(Player, T).
+
 
 %%%% Predicate to get the next player
 changePlayer('x','o').
@@ -106,38 +117,47 @@ changePlayer('o','x').
 %%%% Print the line at index
 % rechanger pour afficher des - au lieu de la valeurs des variables
 % libres
-printLine(Index) :-  board(B),
-    write(' '), nth0(0,B,Col0), nth0(Index,Col0,Val),write(Val), write(' '),
-    write(' '), nth0(1,B,Col1), nth0(Index,Col1,Val),write(Val), write(' '),
-    write(' '), nth0(2,B,Col2), nth0(Index,Col2,Val),write(Val), write(' '),
-    write(' '), nth0(3,B,Col3), nth0(Index,Col3,Val),write(Val), write(' '),
-    write(' '), nth0(4,B,Col4), nth0(Index,Col4,Val),write(Val), write(' '),
-    write(' '), nth0(5,B,Col5), nth0(Index,Col5,Val),write(Val), write(' '),
-    write(' '), nth0(6,B,Col6), nth0(Index,Col6,Val),write(Val), write(' ').
+printLine(IndexFile, Board) :-
+	printLine(IndexFile, 0, Board).
+
+printLine(IndexFile, IndexColonne,  Board) :-
+    nth0(IndexColonne,Board,Col0), nth0(IndexFile,Col0,Val),
+    nonvar(Val),!,
+    write(' '), write(Val), write(' '),
+    NewIndexColonne is IndexColonne+1,
+    printLine(IndexFile, NewIndexColonne, Board).
+
+printLine(IndexFile, IndexColonne,  Board) :-
+    nth0(IndexColonne,Board,Col0), nth0(IndexFile,Col0,Val),
+    write(' '), write('_'), write(' '),
+    NewIndexColonne is IndexColonne+1,
+    printLine(IndexFile, NewIndexColonne, Board).
+
+
+
+printLine(IndexFile, 7, Board).
 
 %%%% Display the board
-displayBoard:-
+%TODO: recrire sans coder en dur le 0,1,2...
+displayBoard(Board):-
     writeln('*-------------------*'),
-    printLine(0), writeln(''),
-    printLine(1), writeln(''),
-    printLine(2), writeln(''),
-    printLine(3), writeln(''),
-    printLine(4), writeln(''),
-    printLine(5), writeln(''),
+    printLine(5, Board), writeln(''),
+    printLine(4, Board), writeln(''),
+    printLine(3, Board), writeln(''),
+    printLine(2, Board), writeln(''),
+    printLine(1, Board), writeln(''),
+    printLine(0, Board), writeln(''),
     writeln('*-------------------*').
 
-initColumns([H|T]):-
-    length(H,6),
-    initColumns(T).
-
-initColumns([]).
 
 %%%%% Start the game!
-init :- length(Board,7),initColumns(Board), assert(board(Board)), displayBoard, play('x').
+init :- length(Board,7),maplist(length_list(6),Board), displayBoard(Board), play('x', Board).
+
+length_list(L, Ls) :- length(Ls, L).
 
 
 %%%% A FAIRE %%%%
 % - rechanger les isColFull
 % - changer ia
 % - changer playMove
-% - trouver moyen d'initialiser le plateau au début du jeu
+% - trouver moyen d'initialiser le plateau au dï¿½but du jeu
