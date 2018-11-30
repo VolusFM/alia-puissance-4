@@ -27,40 +27,48 @@ isBoardFull(B):-
     nth0(6,B,Col6), isColFull(Col6).
 
 %%%% Winning condition
-winner(Board, Winner) :- fourVertical(Board, Winner).
-winner(Board, Winner) :- fourHorizontal(Board, Winner).
-winner(Board, Winner) :- fourDiagonalUp(Board, Winner).
-winner(Board, Winner) :- fourDiagonalDown(Board, Winner).
+winner(Board,Winner) :- fourVertical(Board, Winner).
+winner(Board,Winner) :- fourHorizontal(Board, Winner).
+winner(Board,Winner) :- fourDiagonalUp(Board, Winner).
+winner(Board,Winner) :- fourDiagonalDown(Board, Winner).
 
-%%%% Test if there is column with four adjacent tokens of the same color.
-fourVertical(Board, P):- append(_, [C|_], Board),
-    append(_, [P,P,P,P|_], C).
+
+%%%% Test if there is column with four adjacent tokens of the same color
+%P='o'
+%Board=[[_ _ _ _],[_ _ _]]
+fourVertical(Board, P):-
+    append(_, [C|_], Board),
+    append(_, [A,A,A,A|_], C),
+    A==P.
 
 %%%% Test if there are four columns with a line of four adjacent tokens of the same color.
 fourHorizontal(Board, P) :- append(_, [C1, C2, C3, C4|_], Board),
-    append(_, [P|X1], C1),
-    append(_, [P|X2], C2),
-    append(_, [P|X3], C3),
-    append(_, [P|X4], C4),
+    append(_, [A|X1], C1),
+    append(_, [A|X2], C2),
+    append(_, [A|X3], C3),
+    append(_, [A|X4], C4),
+    A==P,
     length(X1, L), length(X2, L), length(X3, L), length(X4, L).
 
 %%%% Test if there are four columns with a diagonal of four adjacent tokens of the same color (going down).
 fourDiagonalDown(Board, P):- append(_, [C1, C2, C3, C4|_], Board),
-    append(_, [P|X1], C1),
-    append(_, [P|X2], C2),
-    append(_, [P|X3], C3),
-    append(_, [P|X4], C4),
+    append(_, [A|X1], C1),
+    append(_, [A|X2], C2),
+    append(_, [A|X3], C3),
+    append(_, [A|X4], C4),
+    A==P,
     length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1+1, L3 is L1+2, L4 is L1+3.
 
 %%%%% Test if there are four columns with a diagonal of four adjacent tokens of the same color (going up).
 fourDiagonalUp(Board, P):- append(_,[C1, C2, C3, C4|_], Board),
-    append(_, [P|X1], C1),
-    append(_, [P|X2], C2),
-    append(_, [P|X3], C3),
-    append(_, [P|X4], C4),
-    length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1-1, L3 is L1-2, L4 is L1-3.
+    append(_, [A|X1], C1),
+    append(_, [A|X2], C2),
+    append(_, [A|X3], C3),
+    append(_, [A|X4], C4),
+    A==P,
+length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1-1, L3 is L1-2, L4 is L1-3.
 
-insertElemInCol([H|_], Player) :- var(H), H is Player.
+insertElemInCol([H|_], Player) :- var(H), H = Player.
 insertElemInCol([H|T], Player) :- nonvar(H), insertElemInCol(T, Player).
 
 %%%% Artificial intelligence: choose in a Board the index to play for Player (_)
@@ -72,9 +80,9 @@ ia(Board, Index,Player) :- repeat, Index is random(7), nth0(Index, Board, Col), 
 
 %%%% Recursive predicate for playing the game.
 % The game is over, we use a cut to stop the proof search, and display the winner/board.
-play(_):- gameover(Winner), !, write('Game is Over. Winner: '), writeln(Winner), displayBoard.
+play(Player):- changePlayer(Player,NextPlayer),gameover(NextPlayer), !, write('Game is Over. Winner: '), writeln(NextPlayer), displayBoard.
 % The game is not over, we play the next turn
-play(Player):-  write('New turn for:'), writeln(Player),
+play(Player):-  write('New turn for: '), writeln(Player),
 		board(Board), % instanciate the board from the knowledge base
                 displayBoard, % print it
                 ia(Board, Move,Player), % ask the AI for a move, that is, an index for the Player
@@ -85,7 +93,7 @@ play(Player):-  write('New turn for:'), writeln(Player),
 
 
 %%%% Play a Move, the new Board will be the same, but one value will be instanciated with the Move
-playMove(Board,Move,NewBoard,Player) :- Board=NewBoard,  nth0(Move,NewBoard,Player).
+playMove(Board,Move,NewBoard,Player) :- Board=NewBoard,  nth0(Move,NewBoard,Player). % pb avec nth0 !!!
 
 %%%% Remove old board/save new on in the knowledge base
 applyIt(Board,NewBoard) :- retract(board(Board)), assert(board(NewBoard)).
@@ -95,19 +103,17 @@ changePlayer('x','o').
 changePlayer('o','x').
 
 %%%% Print the value of the colomns at index N:
-% if its a variable, print ? and x or o otherwise.
-printVal(N) :- board(B), nth0(N,B,Val), var(Val), write('?'), !.
-printVal(N) :- board(B), nth0(N,B,Val), write(Val).
-
 %%%% Print the line at index
+% rechanger pour afficher des - au lieu de la valeurs des variables
+% libres
 printLine(Index) :-  board(B),
-    write(' '), nth0(0,B,Col0), nth0(Index,Col0,Val),printVal(Val), write(' '),
-    write(' '), nth0(1,B,Col1), nth0(Index,Col1,Val),printVal(Val), write(' '),
-    write(' '), nth0(2,B,Col2), nth0(Index,Col2,Val),printVal(Val), write(' '),
-    write(' '), nth0(3,B,Col3), nth0(Index,Col3,Val),printVal(Val), write(' '),
-    write(' '), nth0(4,B,Col4), nth0(Index,Col4,Val),printVal(Val), write(' '),
-    write(' '), nth0(5,B,Col5), nth0(Index,Col5,Val),printVal(Val), write(' '),
-    write(' '), nth0(6,B,Col6), nth0(Index,Col6,Val),printVal(Val), write(' ').
+    write(' '), nth0(0,B,Col0), nth0(Index,Col0,Val),write(Val), write(' '),
+    write(' '), nth0(1,B,Col1), nth0(Index,Col1,Val),write(Val), write(' '),
+    write(' '), nth0(2,B,Col2), nth0(Index,Col2,Val),write(Val), write(' '),
+    write(' '), nth0(3,B,Col3), nth0(Index,Col3,Val),write(Val), write(' '),
+    write(' '), nth0(4,B,Col4), nth0(Index,Col4,Val),write(Val), write(' '),
+    write(' '), nth0(5,B,Col5), nth0(Index,Col5,Val),write(Val), write(' '),
+    write(' '), nth0(6,B,Col6), nth0(Index,Col6,Val),write(Val), write(' ').
 
 %%%% Display the board
 displayBoard:-
@@ -120,12 +126,18 @@ displayBoard:-
     printLine(5), writeln(''),
     writeln('*-------------------*').
 
+initColumns([H|T]):-
+    length(H,6),
+    initColumns(T).
+
+initColumns([]).
+
 %%%%% Start the game!
-% fill the columns with '.'
-% https://stackoverflow.com/questions/16431465/prolog-fill-list-with-n-elements
-fill([], _, '.').
-fill([X|Xs], X, N) :- succ(N0, N), fill(Xs, X, N0).
+init :- length(Board,7),initColumns(Board), assert(board(Board)), displayBoard, play('x').
 
-fillBoard([H|T]) :- fill([H|],H,6), fillBoard(T).
 
-init :- length(Board,7), assert(board(Board)), play('x').
+%%%% A FAIRE %%%%
+% - rechanger les isColFull
+% - changer ia
+% - changer playMove
+% - trouver moyen d'initialiser le plateau au début du jeu
