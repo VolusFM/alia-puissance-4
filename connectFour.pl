@@ -71,9 +71,28 @@ length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1-1, L3 i
 %%%% This AI plays randomly and does not care who is playing: it chooses a free position
 %%%% in the Board (an element which is an free variable).
 ia(Board, Index) :-
-	repeat, Index is random(7),
+	repeat, Index is random(2),
 	nth0(Index, Board, Col),
 	not(isColFull(Col)),!.
+
+possibleMove(Board, Move) :-
+	nth0(Move, Board, Col),
+	not(isColFull(Col)).
+
+chooseMove('x', Board, Move) :-
+	read(Move).
+
+chooseMove('x', Board, Move) :-
+	minimax(2, Board, 'o', -1, Move, Value),
+	write(Move).
+
+chooseMove('x', Board, Move) :-
+	ia(Board, Move).
+
+chooseMove('o', Board, Move) :-
+	minimax(3, Board, 'o', -1, Move, Value),
+	write(Move).
+
 
 
 %%%% Recursive predicate for playing the game.
@@ -83,7 +102,7 @@ play(Player, Board):- changePlayer(Player,NextPlayer),gameover(NextPlayer, Board
 % The game is not over, we play the next turn
 play(Player, Board):-  write('New turn for: '), writeln(Player),
 		displayBoard(Board), % print it
-		ia(Board, Move), % ask the AI for a move, that is, an index for the Player
+		chooseMove(Player, Board, Move), % ask the AI for a move, that is, an index for the Player
 		playMove(Board,Move,NewBoard,Player), % Play the move and get the result in a new Board
 		changePlayer(Player,NextPlayer), % Change the player before next turn
 		play(NextPlayer, NewBoard). % next turn!
@@ -94,10 +113,31 @@ play(Player, Board):-
 
 %%%% Play a Move, the new Board will be the same, but one value will be instanciated with the Move
 playMove(Board, Move, NewBoard, Player) :-
-	NewBoard = Board,
+	length(NewBoard, 7),
+	maplist(length_list(6),NewBoard),
+	copyBoard(Board, NewBoard),
 	nth0(Move, NewBoard, Column),
-	insertToken(Player, Column),
-	nth0(Move, NewBoard, Column).
+	insertToken(Player, Column).
+
+copyBoard([],[]).
+
+copyBoard([C | Board], [NewC | NewBoard]):-
+	copyColumn(C, NewC),
+	copyBoard(Board, NewBoard).
+
+copyColumn([H|T],[NewH|NewT]):-
+	nonvar(H),
+	NewH = H,
+	copyColumn(T,NewT).
+
+copyBoard([],[]).
+
+copyColumn([H|T],[NewH|NewT]):-
+	var(H).
+
+copyColumn([],[]).
+
+
 
 %insert token in column
 insertToken(Player, [H|_]) :-
