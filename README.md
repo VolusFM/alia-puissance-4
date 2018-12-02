@@ -6,5 +6,5 @@ Construire une interface permettant de jouer à puissance 4 (représentation du 
 
 ## Représentation du jeu
 
-- Le plateau est représenté par sept listes (une par colonne) de six éléments chacune.
-- Une case vide est représentée par un 0. Une case pleine est représentée par r ou j (la couleur du pion qu'elle contient).
+- Le plateau est représenté par une list contenant sept autres listes (une par colonne) de six éléments chacune.
+- Une case vide est représentée par une variable libre. Une case pleine est représentée par 'x' ou 'o' (la couleur du pion qu'elle contient).
