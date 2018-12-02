@@ -45,10 +45,38 @@ evaluateList([C|Q], Player, Sum, CountPlayer, _, Final) :-
     CountPlayer >= 4, Sum1 is Sum + 1000, evaluateList(Q, Player, Sum1, 0, 1, Final).
     % Cases above 4 are irrelevant as the game would already be over at that point.
 
-%%%%%% Create a list corresponding to the reverserd line of the Board at the height Index. 
-% The Board is the first parameter. Should be called with List at []. Return Final. 
-createListWithLine([], List, _, Final) :- copyterm(List, Final).
-createListWithLine([C|Q], List, Index, Final) :- append(, [Head|Stack], C),
-    Heigth is 6-Index, length(Stack,Heigth), !,
-    createListWithLine(Q, [Head|List], Index, Final).
+%%%%%% Create a list corresponding to the line of the board at the height Index. 
+% The board is the first parameter. The second parameter is the return value.
+% Index should never be superior to 6. 
+createListFromLine([], [], _).
+createListFromLine([C|B], [Head|ReturnQ], Index) :- append(_,[Head|Stack],C),
+    length(C, BoardHeight), BoardHeight >= Index,
+    Height is BoardHeight - Index, length(Stack, Height), !,
+    createListFromLine(B, ReturnQ, Index).
+
+%%%%%% Create a list corresponding to the diagonal starting at the column ColumnIndex, line LineIndex, 
+% going up, to the right. 
+% The board is the first parameter. The second parameter is the return value.
+% LineIndex should never be superior to 6. ColumnIndex should never be superior to 7.
+createListFromDiagonalUp([], [], _, _).
+createListFromDiagonalUp([C|B], ReturnQ, 1, LineIndex) :- length(C, MaxLineIndex),LineIndex>MaxLineIndex
+    , !, createListFromDiagonalUp(B, ReturnQ, 1, LineIndex).
+createListFromDiagonalUp([C|B], [Head|ReturnQ], 1, LineIndex) :- append(_,[Head|Stack], C),
+    length(C, BoardHeight), Height is BoardHeight - LineIndex, length(Stack, Height), !,
+    NewLineIndex is LineIndex + 1, createListFromDiagonalUp(B, ReturnQ, 1, NewLineIndex).
+createListFromDiagonalUp([_|B], [Head|ReturnQ], ColumnIndex, LineIndex) :- NewColumnIndex is ColumnIndex - 1,
+    createListFromDiagonalUp(B, [Head|ReturnQ], NewColumnIndex, LineIndex).
+
+%%%%%% Create a list corresponding to the diagonal starting at the column ColumnIndex, line LineIndex, 
+% going down, to the right.
+% The board is the first parameter. The second parameter is the return value.
+% LineIndex should never be superior to 6. ColumnIndex should never be superior to 7.
+createListFromDiagonalDown([], [], _, _).
+createListFromDiagonalDown([_|B], ReturnQ, 1, LineIndex) :- 1 > LineIndex, !, 
+	createListFromDiagonalDown(B, ReturnQ, 1, LineIndex).
+createListFromDiagonalDown([C|B], [Head|ReturnQ], 1, LineIndex) :- append(_,[Head|Stack], C),
+    length(C, BoardHeight), Height is BoardHeight - LineIndex, length(Stack, Height), !,
+    NewLineIndex is LineIndex - 1, createListFromDiagonalDown(B, ReturnQ, 1, NewLineIndex).
+createListFromDiagonalDown([_|B], [Head|ReturnQ], ColumnIndex, LineIndex) :- NewColumnIndex is ColumnIndex - 1,
+    createListFromDiagonalDown(B, [Head|ReturnQ], NewColumnIndex, LineIndex).
 	
