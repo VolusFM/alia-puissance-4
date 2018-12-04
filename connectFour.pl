@@ -13,8 +13,9 @@ gameover('Draw', Board) :- isBoardFull(Board). % the Board is fully instanciated
 %%%% are instanciated: true e.g. for [x,x,o,o,x,o] false for
 %%%% [x,x,o,o,_G125,x]
 isColFull([]).
-isColFull([H|T]):- nonvar(H), isColFull(T). %%%%%% a changer
+isColFull([H|T]):- nonvar(H), isColFull(T).
 
+% B needs to have 7 elements
 isBoardFull(B):-
     nth0(0,B,Col0), isColFull(Col0),
     nth0(1,B,Col1), isColFull(Col1),
