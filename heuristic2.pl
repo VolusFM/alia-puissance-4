@@ -10,7 +10,6 @@ value(Board, Value):-
 %TODO: Define the heuristic
 %x is positive, o is negative
 value(Board, Value):-
-	valueOfColumn(Column, ValueColumn),
 	findall([Row, Column], areInBoard(Row, Column), Coords),
 	sumValues(Coords,Board, Value).
 
@@ -21,7 +20,6 @@ areInBoard(Row, Column) :-
 	Column < 7.
 
 
-
 valueElement( Row, Column, Board) :-
 	Value is 0.
 
@@ -29,15 +27,12 @@ sumValues([],Board,0).
 
 sumValues([[Row, Column] | T], Board, Value) :-
 	sumValues(T, Board, ValueRest),
-	valueElement(Row, Column, Board, ValueCase),
-	Value is NewValue + ValueCase.
-
-rowColumnValue(Row,Column,Board,Value):-
-
-
+	valueElement(Row, Column, Board, ValueThis),
+	Value is ValueRest + ValueThis.
 
 
 
 isEmpty(Row, Column, Board) :-
-	nth0(Row, Board, Element),
-	nth0(Column, Element, '.').
+	nth0(Column, Board, ColumnElement),
+	nth0(Row, ColumnElement, Element),
+	var(Element).
