@@ -82,7 +82,7 @@ possibleMove(Board, Move) :-
 	nth0(Move, Board, Col),
 	not(isColFull(Col)).
 
-chooseMove('o', _, Move) :-
+chooseMove('x', _, Move) :-
 	read(Move).
 
 chooseMove('x', Board, Move) :-
