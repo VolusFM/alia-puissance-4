@@ -5,13 +5,15 @@
 evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Record, BestMove):-
     playMove(Board,Move,NewBoard,Player),
     gameover(Player, NewBoard),
-    BestMove = (Move, 1000*MaxMin), !.
+    BestMove = (Move, 1000), !.
 
 evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Record, BestMove):-
     playMove(Board,Move,NewBoard,Player),
     changePlayer(Player, NewPlayer),
-    minimax(Depth, NewBoard, NewPlayer, MaxMin, MoveX, Value),
-    update(Move, Value, Record, NewRecord),
+    MinMax is -MaxMin,
+    minimax(Depth, NewBoard, NewPlayer, MinMax, MoveX, Value),
+    MyValue is -Value,
+    update(Move, MyValue, Record, NewRecord),
     evaluate_and_choose(Moves, Player, Board, Depth, MaxMin, NewRecord, BestMove).
 
 %no possible moves to do
@@ -29,8 +31,7 @@ minimax(Depth, Board, Player, MaxMin, Move, Value) :-
     %TODO: realation move
     setof(M, possibleMove(Board, M), Moves),
     NewDepth is Depth - 1,
-    MinMax is -MaxMin,
-    evaluate_and_choose(Moves, Player, Board, NewDepth, MinMax, (nil, -1000),
+    evaluate_and_choose(Moves, Player, Board, NewDepth, MaxMin, (nil, -1000),
                         (Move, Value)).
 
 update(Move, Value, (Move1, Value1), (Move1, Value1)):-
