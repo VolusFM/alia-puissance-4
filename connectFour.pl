@@ -79,12 +79,12 @@ possibleMove(Board, Move) :-
 	nth0(Move, Board, Col),
 	not(isColFull(Col)).
 
-chooseMove('o', Board, Move) :-
+chooseMove('x', Board, Move) :-
 	read(Move).
 
-chooseMove('x', Board, Move) :-
-	minimax(3, Board, 'o', -1, Move, Value),
-	write(Move).
+chooseMove('o', Board, Move) :-
+	minimax(4, Board, 'o', -1, Move, Value),
+	write(Value).
 
 chooseMove('x', Board, Move) :-
 	ia(Board, Move).
@@ -93,19 +93,22 @@ chooseMove('x', Board, Move) :-
 	minimax(3, Board, 'o', -1, Move, Value),
 	write(Move).
 
+chooseMove('o', Board, Move) :-
+	ia(Board, Move).
+
 
 
 %%%% Recursive predicate for playing the game.
 % The game is over, we use a cut to stop the proof search, and display the winner/board.
-play(Player, Board):- changePlayer(Player,NextPlayer),gameover(NextPlayer, Board), !, write('Game is Over. Winner: '),
-	writeln(NextPlayer), displayBoard(Board).
+play(Player, Board, 1):-  !, write('Game is Over. Winner: '), changePlayer(Player, PreviousPlayer),
+	writeln(PreviousPlayer), displayBoard(Board).
 % The game is not over, we play the next turn
-play(Player, Board):-  write('New turn for: '), writeln(Player),
+play(Player, Board, 0):-  write('New turn for: '), writeln(Player),
 		displayBoard(Board), % print it
 		chooseMove(Player, Board, Move), % ask the AI for a move, that is, an index for the Player
-		playMove(Board,Move,NewBoard,Player), % Play the move and get the result in a new Board
+		playMove(Board,Move,NewBoard,Player, IsWinnerMove), % Play the move and get the result in a new Board
 		changePlayer(Player,NextPlayer), % Change the player before next turn
-		play(NextPlayer, NewBoard). % next turn!
+		play(NextPlayer, NewBoard, IsWinnerMove). % next turn!
 
 %No moves possible
 play(Player, Board):-
@@ -119,6 +122,57 @@ playMove(Board, Move, NewBoard, Player) :-
 	nth0(Move, NewBoard, Column),
 	insertToken(Player, Column).
 
+playMove(Board, Move, NewBoard, Player, IsWinnerMove) :-
+	length(NewBoard, 7),
+	maplist(length_list(6),NewBoard),
+	copyBoard(Board, NewBoard),
+	nth0(Move, NewBoard, Column),
+	insertToken(Player, Column),
+	getLastRowPlayed(Column, Row),
+	isWinner(Move, Row, Player, NewBoard, IsWinnerMove), !.
+
+isWinner(Column, Row, Player, Board, IsWinnerMove):-
+	nextColumnRow(Row, Column, [1,1], NextRow, NextColumn),
+	nextColumnRow(Row, Column, [-1, -1], PreviousRow, PreviousColumn),
+
+	countTokensDirection(Board, [1,0], Player, Row, NextColumn, NbTokensRight),
+	countTokensDirection(Board, [-1,0], Player, Row, PreviousColumn, NbTokensLeft),
+
+	%vertical
+	countTokensDirection(Board, [0,1], Player, NextRow, Column, NbTokensUp),
+	countTokensDirection(Board, [0,-1], Player, PreviousRow, Column, NbTokensDown),
+
+	%diagonal up
+	countTokensDirection(Board, [1,1], Player, NextRow, NextColumn, NbTokensRightUp),
+	countTokensDirection(Board, [-1,1], Player, NextRow, PreviousColumn, NbTokensLeftUp),
+
+	%diagonal down
+	countTokensDirection(Board, [1,-1], Player, PreviousRow, NextColumn, NbTokensRightDown),
+	countTokensDirection(Board, [-1,-1], Player, PreviousRow, PreviousColumn, NbTokensLeftDown),
+
+	((NbTokensRight + NbTokensLeft > 2;
+	NbTokensUp + NbTokensDown > 2;
+	NbTokensRightUp + NbTokensLeftDown > 2;
+	NbTokensRightDown+ NbTokensLeftUp > 2)->
+		IsWinnerMove is 1
+	;
+		IsWinnerMove is 0
+	).
+
+
+getLastRowPlayed([], Row):-
+	Row is -1.
+
+getLastRowPlayed([H | T], Row):-
+	var(H),
+	Row is -1.
+
+
+getLastRowPlayed([H | T], Row) :-
+	getLastRowPlayed(T, RowTail),
+	Row is RowTail+1.
+
+
 copyBoard([],[]).
 
 copyBoard([C | Board], [NewC | NewBoard]):-
@@ -130,7 +184,6 @@ copyColumn([H|T],[NewH|NewT]):-
 	NewH = H,
 	copyColumn(T,NewT).
 
-copyBoard([],[]).
 
 copyColumn([H|T],[NewH|NewT]):-
 	var(H).
@@ -191,7 +244,7 @@ displayBoard(Board):-
 
 
 %%%%% Start the game!
-init :- length(Board,7),maplist(length_list(6),Board), displayBoard(Board), play('x', Board).
+init :- length(Board,7),maplist(length_list(6),Board), displayBoard(Board), play('x', Board, 0).
 
 length_list(L, Ls) :- length(Ls, L).
 

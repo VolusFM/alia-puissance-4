@@ -69,8 +69,8 @@ valueRowColumn( Row, Column, Board, Value) :-
 	%checks if the placing and x would make 4 connected tokens
 	((has3Conected('x', TokenLeft, TokenRight, NbTokensLeft, NbTokensRight) ;
 	has3Conected('x', TokenDown, TokenUp, NbTokensDown, NbTokensUp);
-	has3Conected('x', TokenLeftUp, TokenRightUp, NbTokensLeftUp, NbTokensRightUp);
-	has3Conected('x', TokenLeftDown, TokenRightDown, NbTokensLeftDown, NbTokensRightDown))->
+	has3Conected('x', TokenLeftUp, TokenRightUp, NbTokensLeftUp, NbTokensRightDown);
+	has3Conected('x', TokenLeftDown, TokenRightDown, NbTokensLeftDown, NbTokensRightUp))->
 		XHas3 is 1
 		;
 		XHas3 is 0
@@ -79,7 +79,7 @@ valueRowColumn( Row, Column, Board, Value) :-
 	((has3Conected('o', TokenLeft, TokenRight, NbTokensLeft, NbTokensRight) ;
 	has3Conected('o', TokenDown, TokenUp, NbTokensDown, NbTokensUp);
 	has3Conected('o', TokenLeftUp, TokenRightUp, NbTokensLeftUp, NbTokensRightUp);
-	has3Conected('o', TokenLeftDown, TokenRightDown, NbTokensLeftDown, NbTokensRightDown))->
+	has3Conected('o', TokenLeftDown, TokenRightDown, NbTokensLeftDown, NbTokensRightUp))->
 		OHas3 is 1
 		;
 		OHas3 is 0
