@@ -196,4 +196,4 @@ displayBoard(Board):-
 length_list(L, Ls) :- length(Ls, L).
 
 %%%%% Start the game!
-init :- length(Board,7),maplist(length_list(6),Board), displayBoard(Board), play('x', Board).
+init :- length(Board,7),maplist(length_list(6),Board), displayBoard(Board), play('x', Board,0).
