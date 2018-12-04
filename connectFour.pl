@@ -90,7 +90,7 @@ chooseMove('x', Board, Move) :-
 	ia(Board, Move).
 
 chooseMove('o', Board, Move) :-
-	minimax(3, Board, 'o', -1, Move, Value),
+	minimax(2, Board, 'o', -1, Move, Value),
 	write(Move).
 
 

@@ -40,31 +40,7 @@ update(Move, Value, (Move1, Value1), (Move, Value)) :-
 	Value >= Value1.
 
 
-value(Board, Value):-
-	Value is 0,
-	!.
 
-%TODO: Define the heuristic
-%x is positive, o is negative
-value(Board, Value):-
-	set(myBoard,Board),
-	findall([Row, Column], isEmpty(Row,Column, Board), EmptyCoords),
-	sumValues(EmptyCoords,Board, Value).
-
-sumValues([],Board,0).
-
-sumValues([[Row, Column] | T], Board, Value) :-
-	sumValues(T, Board, NewValue),
-	rowColumnValue(Row, Column, Board, ValueCase),
-	Value is NewValue + ValueCase.
-
-rowColumnValue(Row,Column,Board,2).
-
-
-
-isEmpty(Row, Column, Board) :-
-	nth0(Row, Board, Element),
-	nth0(Column, Element, '.').
 
 
 
