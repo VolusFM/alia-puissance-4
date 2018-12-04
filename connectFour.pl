@@ -69,10 +69,12 @@ length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1-1, L3 i
 
 
 %%%% Artificial intelligence: choose in a Board the index to play for Player (_)
-%%%% This AI plays randomly and does not care who is playing: it chooses a free position
-%%%% in the Board (an element which is an free variable).
+%%%% This AI plays randomly and does not care who is playing: it chooses
+%%%% a free position in the Board (an element which is an free
+%%%% variable).
+% infinite loop if board full
 ia(Board, Index) :-
-	repeat, Index is random(2),
+	repeat, Index is random(7),
 	nth0(Index, Board, Col),
 	not(isColFull(Col)),!.
 
@@ -80,7 +82,7 @@ possibleMove(Board, Move) :-
 	nth0(Move, Board, Col),
 	not(isColFull(Col)).
 
-chooseMove('o', Board, Move) :-
+chooseMove('o', _, Move) :-
 	read(Move).
 
 chooseMove('x', Board, Move) :-
@@ -191,14 +193,7 @@ displayBoard(Board):-
     writeln('*-------------------*').
 
 
-%%%%% Start the game!
-init :- length(Board,7),maplist(length_list(6),Board), displayBoard(Board), play('x', Board).
-
 length_list(L, Ls) :- length(Ls, L).
 
-
-%%%% A FAIRE %%%%
-% - rechanger les isColFull
-% - changer ia
-% - changer playMove
-% - trouver moyen d'initialiser le plateau au d�but du jeu
+%%%%% Start the game!
+init :- length(Board,7),maplist(length_list(6),Board), displayBoard(Board), play('x', Board).

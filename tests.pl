@@ -62,3 +62,7 @@ fourDiagonalUpReturnsTrue() :-
 
 fourDiagonalUpReturnsFalse() :- fourDiagonalUp([[_,_,_,_],[_,_,_,_],[_,_,_,_],[_,_,_,_]],'o').
 fourDiagonalUpReturnsFalse() :- fourDiagonalUp([['x','x','o','o'],['o','o','x','x'],['o',_,'x',_],[_,'x',_,'o']],'o').
+
+
+%%%% ia ?
+iaReturnsIndex(Index) :- ia([[_,_,_],[_,_,_],[_,_,_],[_,_,_],[_,_,_],[_,_,_],[_,_,_]],Index).
