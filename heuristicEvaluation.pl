@@ -89,35 +89,35 @@ valueColumn([C|Q], Value, Final) :- evaluateList(C, 'x', 0, 0, 0, ToAdd), evalua
 
 %%%%%% Index should be initialized to 1, Value should be initialized to 0. Return Final.
 valueLine([CBoard|_], Index, Value, Final) :- length(CBoard,Lgt), Index is Lgt+1, Final is Value.
-valueLine([CBoard|QBoard], Index, Value, Final) :- createListWithLine([CBoard|QBoard], C, Index), 
+valueLine([CBoard|QBoard], Index, Value, Final) :- createListFromLine([CBoard|QBoard], C, Index), 
     evaluateList(C, 'x', 0, 0, 0, ToAdd), evaluateList(C, 'o', 0, 0, 0, ToSub),
     ValLine is Value + ToAdd - ToSub, NewIndex is Index+1, valueLine([CBoard|QBoard], NewIndex, ValLine, Final).
 
-%%%%%% IndexL should be initialized to 1, IndexC should be initialized to 1, 
+%%%%%% LineIndex should be initialized to 1, ColumnIndex should be initialized to 1, 
 % Value should be initialized to 0. Return Final.
-valueDiagonalUp([CBoard|QBoard], IndexC, _, Value, Final) :- length([CBoard|QBoard], Ht), IndexC is Ht+1,
+valueDiagonalUp([CBoard|QBoard], ColumnIndex, _, Value, Final) :- length([CBoard|QBoard], Ht), ColumnIndex is Ht + 1,
     Final is Value.
-valueDiagonalUp([CBoard|QBoard], IndexC, IndexL, Value, Final) :- length([CBoard|QBoard], Ht), Ht+1 > IndexC,
-    length(CBoard,Lgt), IndexL is Lgt+1, NewIndexC is IndexC +1, 
-    valueDiagonalUp([CBoard|QBoard], NewIndexC, 1, Value, Final).
-valueDiagonalUp([CBoard|QBoard], IndexC, IndexL, Value, Final) :- 
-    createListWithDiagonaleUp([CBoard|QBoard], C, IndexC, IndexL), 
+valueDiagonalUp([CBoard|QBoard], ColumnIndex, LineIndex, Value, Final) :- length([CBoard|QBoard], Ht), Ht + 1 > ColumnIndex,
+    length(CBoard,Lgt), LineIndex is Lgt + 1, NewColumnIndex is ColumnIndex + 1, 
+    valueDiagonalUp([CBoard|QBoard], NewColumnIndex, 1, Value, Final).
+valueDiagonalUp([CBoard|QBoard], ColumnIndex, LineIndex, Value, Final) :- 
+    createListFromDiagonalUp([CBoard|QBoard], C, ColumnIndex, LineIndex), 
     evaluateList(C, 'x', 0, 0, 0, ToAdd), evaluateList(C, 'o', 0, 0, 0, ToSub),
-    ValLine is Value + ToAdd - ToSub, NewIndexL is IndexL+1, 
-    valueDiagonalUp([CBoard|QBoard], IndexC, NewIndexL, ValLine, Final).
+    ValLine is Value + ToAdd - ToSub, NewLineIndex is LineIndex + 1, 
+    valueDiagonalUp([CBoard|QBoard], ColumnIndex, NewLineIndex, ValLine, Final).
 
-%%%%%% IndexL should be initialized to 1, IndexC should be initialized to 1, 
+%%%%%% LineIndex should be initialized to 1, ColumnIndex should be initialized to 1, 
 % Value should be initialized to 0. Return Final.
-valueDiagonalDown([CBoard|QBoard], IndexC, _, Value, Final) :- length([CBoard|QBoard], Ht), IndexC is Ht+1,
+valueDiagonalDown([CBoard|QBoard], ColumnIndex, _, Value, Final) :- length([CBoard|QBoard], Ht), ColumnIndex is Ht+1,
     Final is Value.
-valueDiagonalDown([CBoard|QBoard], IndexC, IndexL, Value, Final) :- length([CBoard|QBoard], Ht), Ht+1 > IndexC,
-    length(CBoard,Lgt), IndexL is Lgt+1, NewIndexC is IndexC +1, 
-    valueDiagonalDown([CBoard|QBoard], NewIndexC, 1, Value, Final).
-valueDiagonalDown([CBoard|QBoard], IndexC, IndexL, Value, Final) :- 
-    createListWithDiagonaleDown([CBoard|QBoard], C, IndexC, IndexL), 
+valueDiagonalDown([CBoard|QBoard], ColumnIndex, LineIndex, Value, Final) :- length([CBoard|QBoard], Ht), Ht+1 > ColumnIndex,
+    length(CBoard,Lgt), LineIndex is Lgt+1, NewColumnIndex is ColumnIndex +1, 
+    valueDiagonalDown([CBoard|QBoard], NewColumnIndex, 1, Value, Final).
+valueDiagonalDown([CBoard|QBoard], ColumnIndex, LineIndex, Value, Final) :- 
+    createListFromDiagonalDown([CBoard|QBoard], C, ColumnIndex, LineIndex), 
     evaluateList(C, 'x', 0, 0, 0, ToAdd), evaluateList(C, 'o', 0, 0, 0, ToSub),
-    ValLine is Value + ToAdd - ToSub, NewIndexL is IndexL+1, 
-    valueDiagonalDown([CBoard|QBoard], IndexC, NewIndexL, ValLine, Final).
+    ValLine is Value + ToAdd - ToSub, NewLineIndex is LineIndex+1, 
+    valueDiagonalDown([CBoard|QBoard], ColumnIndex, NewLineIndex, ValLine, Final).
 
 value(Board, Value) :- valueDiagonalDown(Board, 1, 1, 0, Final1), valueDiagonalUp(Board, 1, 1, 0, Final2),
     valueColumn(Board, 0, Final3), valueLine(Board, 1, 0, Final4), Value is Final1 + Final2 + Final3 + Final4.
