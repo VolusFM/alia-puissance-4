@@ -3,8 +3,8 @@
 %Record is the best move until now in the form (move, value)
 %TODO: Test
 evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Record, BestMove):-
-    playMove(Board,Move,NewBoard,Player),
-    gameover(Player, NewBoard),
+    playMove(Board,Move,NewBoard,Player, IsWinnerMove),
+    IsWinnerMove == 1,
     BestMove = (Move, 1000), !.
 
 evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Record, BestMove):-
