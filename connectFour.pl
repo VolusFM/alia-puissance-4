@@ -80,18 +80,18 @@ possibleMove(Board, Move) :-
 	nth0(Move, Board, Col),
 	not(isColFull(Col)).
 
-chooseMove('x', Board, Move) :-
+chooseMove('o', Board, Move) :-
 	read(Move).
 
 chooseMove('x', Board, Move) :-
-	minimax(2, Board, 'o', -1, Move, Value),
+	minimax(3, Board, 'o', -1, Move, Value),
 	write(Move).
 
 chooseMove('x', Board, Move) :-
 	ia(Board, Move).
 
-chooseMove('o', Board, Move) :-
-	minimax(2, Board, 'o', -1, Move, Value),
+chooseMove('x', Board, Move) :-
+	minimax(3, Board, 'o', -1, Move, Value),
 	write(Move).
 
 
