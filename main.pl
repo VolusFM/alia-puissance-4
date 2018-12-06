@@ -3,3 +3,4 @@
 :-include('minimax.pl').
 :-include('heuristic2.pl').
 :-include('heuristicEvaluation.pl').
+:-include('heuristicComparator.pl')
