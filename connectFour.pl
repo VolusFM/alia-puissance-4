@@ -82,15 +82,15 @@ possibleMove(Board, Move) :-
 
 chooseMove('x', Board, Move) :-
 	read(Move),
-	write(Move).
+	writeln(Move), writeln('').
 
 chooseMove('x', Board, Move) :-
 	alpha_beta(1, Board, 'x', 1, -1000, 1000, Move, Value, heuristicOther),
-	write(Value).
+	writeln(Value), writeln('').
 
 chooseMove('o', Board, Move) :-
 	alpha_beta(1, Board, 'o', -1, -1000, 1000, Move, Value, heuristicJoan),
-	write(Value).
+	writeln(Value), writeln('').
 
 
 
@@ -98,8 +98,11 @@ chooseMove('o', Board, Move) :-
 
 %%%% Recursive predicate for playing the game.
 % The game is over, we use a cut to stop the proof search, and display the winner/board.
-play(Player, Board, 1):-  !, write('Game is Over. Winner: '), changePlayer(Player, PreviousPlayer),
-	writeln(PreviousPlayer), displayBoard(Board).
+play(Player, Board, 1):-  !,  displayBoard(Board),
+    writeln(''),
+    write('Game is Over. Winner: '),
+    changePlayer(Player, PreviousPlayer),
+    writeln(PreviousPlayer).
 % The game is not over, we play the next turn
 play(Player, Board, 0):-  write('New turn for: '), writeln(Player),
 		displayBoard(Board), % print it
@@ -266,31 +269,31 @@ printLine(IndexFile, IndexColonne,  Board) :-
 
 printLine(IndexFile, IndexColonne,  Board) :-
     nth0(IndexColonne,Board,Col0), nth0(IndexFile,Col0,Val),
-    write(' '), write('_'), write(' '),
+    write(' '), write('-'), write(' '),
     NewIndexColonne is IndexColonne+1,
     printLine(IndexFile, NewIndexColonne, Board).
-
-
 
 printLine(IndexFile, 7, Board).
 
 %%%% Display the board
 %TODO: recrire sans coder en dur le 0,1,2...
 displayBoard(Board):-
-    writeln('*-------------------*'),
-    printLine(5, Board), writeln(''),
-    printLine(4, Board), writeln(''),
-    printLine(3, Board), writeln(''),
-    printLine(2, Board), writeln(''),
-    printLine(1, Board), writeln(''),
-    printLine(0, Board), writeln(''),
-    writeln('*-------------------*').
+    writeln('  0  1  2  3  4  5  6'),
+    writeln('*---------------------*'),
+    write('|'), printLine(5, Board), write('|'), writeln(''),
+    write('|'), printLine(4, Board), write('|'), writeln(''),
+    write('|'), printLine(3, Board), write('|'), writeln(''),
+    write('|'), printLine(2, Board), write('|'), writeln(''),
+    write('|'), printLine(1, Board), write('|'), writeln(''),
+    write('|'), printLine(0, Board), write('|'), writeln(''),
+    writeln('*---------------------*'),
+    writeln('  0  1  2  3  4  5  6').
 
 
 length_list(L, Ls) :- length(Ls, L).
 
 %%%%% Start the game!
-init :- length(Board,7), maplist(length_list(6),Board), displayBoard(Board), play('x', Board, 0).
+init :- length(Board,7), maplist(length_list(6),Board), play('x', Board, 0).
 
 
 
