@@ -84,7 +84,7 @@ chooseMove('x', Board, Move) :-
 	read(Move).
 
 chooseMove('o', Board, Move) :-
-	minimax(3, Board, 'o', -1, Move, Value),
+	minimax(4, Board, 'o', -1, Move, Value),
 	write(Value).
 
 
