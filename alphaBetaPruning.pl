@@ -13,8 +13,8 @@ evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Alpha, Beta, Rec
     MinMax is -MaxMin,
     NewAlpha is -Beta,
     NewBeta is -Alpha,
-    alpha_beta(Depth, NewBoard, NewPlayer, MinMax, NewAlpha, NewBeta, MoveX, Value, Heuristic),
-    MyValue is -Value,
+    alpha_beta(Depth, NewBoard, NewPlayer, MinMax, NewAlpha, NewBeta, MoveX, ValueOpponent, Heuristic),
+    MyValue is -ValueOpponent,
     UpdatedAlpha is max(Alpha, MyValue),
     update(Move, MyValue, Record, NewRecord),
     (UpdatedAlpha < Beta->

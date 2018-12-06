@@ -11,8 +11,8 @@ evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Record, BestMove
     playMove(Board,Move,NewBoard,Player),
     changePlayer(Player, NewPlayer),
     MinMax is -MaxMin,
-    minimax(Depth, NewBoard, NewPlayer, MinMax, MoveX, Value),
-    MyValue is -Value,
+    minimax(Depth, NewBoard, NewPlayer, MinMax, MoveX, ValueOpponent),
+    MyValue is -ValueOpponent,
     update(Move, MyValue, Record, NewRecord),
     evaluate_and_choose(Moves, Player, Board, Depth, MaxMin, NewRecord, BestMove).
 
