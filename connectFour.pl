@@ -69,10 +69,12 @@ length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1-1, L3 i
 
 
 %%%% Artificial intelligence: choose in a Board the index to play for Player (_)
-%%%% This AI plays randomly and does not care who is playing: it chooses a free position
-%%%% in the Board (an element which is an free variable).
+%%%% This AI plays randomly and does not care who is playing: it chooses
+%%%% a free position in the Board (an element which is an free
+%%%% variable).
+% infinite loop if board full
 ia(Board, Index) :-
-	repeat, Index is random(2),
+	repeat, Index is random(7),
 	nth0(Index, Board, Col),
 	not(isColFull(Col)),!.
 
@@ -80,12 +82,12 @@ possibleMove(Board, Move) :-
 	nth0(Move, Board, Col),
 	not(isColFull(Col)).
 
-chooseMove('x', Board, Move) :-
+chooseMove('x', _, Move) :-
 	read(Move).
 
-chooseMove('o', Board, Move) :-
-	minimax(4, Board, 'o', -1, Move, Value),
-	write(Value).
+chooseMove('x', Board, Move) :-
+	minimax(3, Board, 'o', -1, Move, Value),
+	write(Move).
 
 chooseMove('x', Board, Move) :-
 	ia(Board, Move).
@@ -115,52 +117,6 @@ play(Player, Board, 0):-  write('New turn for: '), writeln(Player),
 play(Player, Board):-
 	gameover('Draw', Board).
 
-
-%Counts the number of tokens int the specified direction
-countTokensDirection(Board, Direction, Token, Row, Column, NbTokens) :-
-	areInBoard(Row, Column),
-	nth0(Column, Board, ColumnElement),
-	nth0(Row, ColumnElement, Element),
-
-	(
-	%Check if we already know the token, if we dont we assign it the value of the element row, column
-	var(Token) ->
-		(var(Element)->
-			NbTokens is 0,
-			fail
-		;%else
-			Token = Element
-		)
-	;%else
-		true
-	)
-	,
-	%Check Token correspond to Element, if no then we have finished
-	%if yes then we continue searching in the direction specified
-	(Element==Token ->
-		nextColumnRow(Row, Column, Direction, NewRow, NewColumn),
-		countTokensDirection(Board, Direction, Token, NewRow, NewColumn, NextNbTokens),
-		NbTokens is NextNbTokens+1
-	;
-		NbTokens is 0
-	).
-
-%When the last function fails it means that Row column is outside the board, so it sends 0
-countTokensDirection(Board, Direction, Token, Row, Column, 0).
-
-%Checks if the row and column are inside the boundaries of the board
-areInBoard(Row, Column) :-
-	between(0, 6, Column),
-	between(0,5, Row).
-
-%Calculates the NewRow and NewColumn from Row and Column in the specified Direction
-%Direction is defined by [ColumnAugmentation, RowAugmentation]
-nextColumnRow(Row, Column, Direction, NewRow, NewColumn) :-
-	nth0(0,Direction, AddColumn),
-	nth0(1,Direction, AddRow),
-	NewRow is Row+AddRow,
-	NewColumn is Column+AddColumn.
-
 %%%% Play a Move, the new Board will be the same, but one value will be instanciated with the Move
 playMove(Board, Move, NewBoard, Player) :-
 	length(NewBoard, 7),
@@ -168,57 +124,6 @@ playMove(Board, Move, NewBoard, Player) :-
 	copyBoard(Board, NewBoard),
 	nth0(Move, NewBoard, Column),
 	insertToken(Player, Column).
-
-playMove(Board, Move, NewBoard, Player, IsWinnerMove) :-
-	length(NewBoard, 7),
-	maplist(length_list(6),NewBoard),
-	copyBoard(Board, NewBoard),
-	nth0(Move, NewBoard, Column),
-	insertToken(Player, Column),
-	getLastRowPlayed(Column, Row),
-	isWinner(Move, Row, Player, NewBoard, IsWinnerMove), !.
-
-isWinner(Column, Row, Player, Board, IsWinnerMove):-
-	nextColumnRow(Row, Column, [1,1], NextRow, NextColumn),
-	nextColumnRow(Row, Column, [-1, -1], PreviousRow, PreviousColumn),
-
-	countTokensDirection(Board, [1,0], Player, Row, NextColumn, NbTokensRight),
-	countTokensDirection(Board, [-1,0], Player, Row, PreviousColumn, NbTokensLeft),
-
-	%vertical
-	countTokensDirection(Board, [0,1], Player, NextRow, Column, NbTokensUp),
-	countTokensDirection(Board, [0,-1], Player, PreviousRow, Column, NbTokensDown),
-
-	%diagonal up
-	countTokensDirection(Board, [1,1], Player, NextRow, NextColumn, NbTokensRightUp),
-	countTokensDirection(Board, [-1,1], Player, NextRow, PreviousColumn, NbTokensLeftUp),
-
-	%diagonal down
-	countTokensDirection(Board, [1,-1], Player, PreviousRow, NextColumn, NbTokensRightDown),
-	countTokensDirection(Board, [-1,-1], Player, PreviousRow, PreviousColumn, NbTokensLeftDown),
-
-	((NbTokensRight + NbTokensLeft > 2;
-	NbTokensUp + NbTokensDown > 2;
-	NbTokensRightUp + NbTokensLeftDown > 2;
-	NbTokensRightDown+ NbTokensLeftUp > 2)->
-		IsWinnerMove is 1
-	;
-		IsWinnerMove is 0
-	).
-
-
-getLastRowPlayed([], Row):-
-	Row is -1.
-
-getLastRowPlayed([H | T], Row):-
-	var(H),
-	Row is -1.
-
-
-getLastRowPlayed([H | T], Row) :-
-	getLastRowPlayed(T, RowTail),
-	Row is RowTail+1.
-
 
 copyBoard([],[]).
 
@@ -231,6 +136,7 @@ copyColumn([H|T],[NewH|NewT]):-
 	NewH = H,
 	copyColumn(T,NewT).
 
+copyBoard([],[]).
 
 copyColumn([H|T],[NewH|NewT]):-
 	var(H).
@@ -289,6 +195,8 @@ displayBoard(Board):-
     printLine(0, Board), writeln(''),
     writeln('*-------------------*').
 
+
+length_list(L, Ls) :- length(Ls, L).
 
 %%%%% Start the game!
 init :- length(Board,7), maplist(length_list(6),Board), displayBoard(Board), play('x', Board, 0).
