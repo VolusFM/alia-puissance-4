@@ -81,12 +81,17 @@ possibleMove(Board, Move) :-
 	not(isColFull(Col)).
 
 chooseMove('x', Board, Move) :-
-	read(Move).
-
-chooseMove('o', Board, Move) :-
-	minimax(4, Board, 'o', -1, Move, Value),
+	minimax(3, Board, 'x', 1, Move, Value),
 	write(Value).
 
+chooseMove('o', Board, Move) :-
+	alpha_beta(4, Board, 'o', -1, -1000, 1000, Move, Value),
+	write(Value).
+
+
+chooseMove('x', Board, Move) :-
+	read(Move),
+	write(Value).
 
 
 
