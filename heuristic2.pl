@@ -7,7 +7,7 @@
 
 
 %returns the value based on the heuristic
-value(Board, Value):-
+value(Board, Value, heuristicJoan):-
 	findall([Row, Column], areInBoard(Row, Column), Coords),
 	sumValues(Coords,Board, Value).
 

@@ -119,5 +119,5 @@ valueDiagonalDown([CBoard|QBoard], ColumnIndex, LineIndex, Value, Final) :-
     ValLine is Value + ToAdd - ToSub, NewLineIndex is LineIndex+1, 
     valueDiagonalDown([CBoard|QBoard], ColumnIndex, NewLineIndex, ValLine, Final).
 
-value(Board, Value) :- valueDiagonalDown(Board, 1, 1, 0, Final1), valueDiagonalUp(Board, 1, 1, 0, Final2),
+value(Board, Value, heuristicOther) :- valueDiagonalDown(Board, 1, 1, 0, Final1), valueDiagonalUp(Board, 1, 1, 0, Final2),
     valueColumn(Board, 0, Final3), valueLine(Board, 1, 0, Final4), Value is Final1 + Final2 + Final3 + Final4.

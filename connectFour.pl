@@ -81,18 +81,17 @@ possibleMove(Board, Move) :-
 	not(isColFull(Col)).
 
 chooseMove('x', Board, Move) :-
-	minimax(3, Board, 'x', 1, Move, Value),
+	alpha_beta(3, Board, 'x', 1, -1000, 1000, Move, Value, heuristicOther),
 	write(Value).
 
 chooseMove('o', Board, Move) :-
-	alpha_beta(4, Board, 'o', -1, -1000, 1000, Move, Value),
+	alpha_beta(2, Board, 'o', -1, -1000, 1000, Move, Value, heuristicJoan),
 	write(Value).
 
 
 chooseMove('x', Board, Move) :-
 	read(Move),
-	write(Value).
-
+	write(Move).
 
 
 %%%% Recursive predicate for playing the game.
