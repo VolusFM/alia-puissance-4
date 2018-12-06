@@ -115,6 +115,52 @@ play(Player, Board, 0):-  write('New turn for: '), writeln(Player),
 play(Player, Board):-
 	gameover('Draw', Board).
 
+
+%Counts the number of tokens int the specified direction
+countTokensDirection(Board, Direction, Token, Row, Column, NbTokens) :-
+	areInBoard(Row, Column),
+	nth0(Column, Board, ColumnElement),
+	nth0(Row, ColumnElement, Element),
+
+	(
+	%Check if we already know the token, if we dont we assign it the value of the element row, column
+	var(Token) ->
+		(var(Element)->
+			NbTokens is 0,
+			fail
+		;%else
+			Token = Element
+		)
+	;%else
+		true
+	)
+	,
+	%Check Token correspond to Element, if no then we have finished
+	%if yes then we continue searching in the direction specified
+	(Element==Token ->
+		nextColumnRow(Row, Column, Direction, NewRow, NewColumn),
+		countTokensDirection(Board, Direction, Token, NewRow, NewColumn, NextNbTokens),
+		NbTokens is NextNbTokens+1
+	;
+		NbTokens is 0
+	).
+
+%When the last function fails it means that Row column is outside the board, so it sends 0
+countTokensDirection(Board, Direction, Token, Row, Column, 0).
+
+%Checks if the row and column are inside the boundaries of the board
+areInBoard(Row, Column) :-
+	between(0, 6, Column),
+	between(0,5, Row).
+
+%Calculates the NewRow and NewColumn from Row and Column in the specified Direction
+%Direction is defined by [ColumnAugmentation, RowAugmentation]
+nextColumnRow(Row, Column, Direction, NewRow, NewColumn) :-
+	nth0(0,Direction, AddColumn),
+	nth0(1,Direction, AddRow),
+	NewRow is Row+AddRow,
+	NewColumn is Column+AddColumn.
+
 %%%% Play a Move, the new Board will be the same, but one value will be instanciated with the Move
 playMove(Board, Move, NewBoard, Player) :-
 	length(NewBoard, 7),
@@ -245,7 +291,7 @@ displayBoard(Board):-
 
 
 %%%%% Start the game!
-init :- length(Board,7),maplist(length_list(6),Board), displayBoard(Board), play('x', Board, 0).
+init :- length(Board,7), maplist(length_list(6),Board), displayBoard(Board), play('x', Board, 0).
 
 length_list(L, Ls) :- length(Ls, L).
 
