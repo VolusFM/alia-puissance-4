@@ -11,7 +11,7 @@ value(Board, Value, heuristicJoan):-
 	findall([Row, Column], areInBoard(Row, Column), Coords),
 	sumValues(Coords,Board, Value).
 
-%Sum the value of each slot in the board
+%Sum the value of each slot
 sumValues([],_,0).
 
 sumValues([[Row, Column] | T], Board, Value) :-
@@ -110,15 +110,11 @@ has3Conected(TokenThatHas3,Token1, Token2, Nb1, Nb2) :-
 	NewN > 2.
 
 
-
-
-
-
-
 modifier('o', -1).
 modifier('x', 1).
 
 %Values of the slots in the board when they are full
+%the closer to the center the higher the value
 valueFullSlot(_, 0, _, _, 0).
 valueFullSlot(_, 1, _, _, 1).
 valueFullSlot(_, 2, _, _, 2).
