@@ -38,7 +38,7 @@ alpha_beta(Depth, Board, Player, MaxMin, Alpha, Beta, Move, Value, Heuristic) :-
     Depth > 0,
     %TODO: realation move
     setof(M, possibleMove(Board, M), OrderedMoves),
-    %random_permutation(OrderedMoves,Moves), %randomnes added to test ai playing with each other
+    random_permutation(OrderedMoves,Moves), %randomnes added to test ai playing with each other
     (Moves==[]-> %draw
     	Value is 0
     ;
