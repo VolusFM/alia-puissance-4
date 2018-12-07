@@ -5,6 +5,10 @@
 % eg column1(x,o,_,_,_,_) after the second round
 % until the board is completely instanciated or someone wins
 
+:- dynamic board/1.
+
+applyIt(Board,NewBoard) :- retract(board(Board)), assert(board(NewBoard)).
+
 %%%% Test is the game is finished %%%
 gameover(Winner, Board) :- winner(Board, Winner), !. % There exists a winning configuration: We cut!
 gameover('Draw', Board) :- isBoardFull(Board). % the Board is fully instanciated (no free variable): Draw.
@@ -90,16 +94,16 @@ chooseMove('o', Board, Move, human) :-
 
 chooseMove('x', Board, Move, Heuristic) :-
 	alpha_beta(4, Board, 'x', 1, -1000, 1000, Move, Value, Heuristic),
-	writeln(Value), writeln('').
+	writeln(Move), writeln('').
 
 chooseMove('o', Board, Move, Heuristic) :-
 	alpha_beta(4, Board, 'o', -1, -1000, 1000, Move, Value, Heuristic),
-	writeln(Value), writeln('').
+	writeln(Move), writeln('').
 
 
 %%%% Recursive predicate for playing the game.
 % The game is over, we use a cut to stop the proof search, and display the winner/board.
-play(Player, Board, 1, Heuristic1, Heuristic2, Winner):-  !,  displayBoard(Board),
+play(Player, 1, Heuristic1, Heuristic2, Winner):-  !, board(Board),  displayBoard(Board),
     writeln(''),
     write('Game is Over. Winner: '),
     changePlayer(Player, PreviousPlayer),
@@ -107,20 +111,32 @@ play(Player, Board, 1, Heuristic1, Heuristic2, Winner):-  !,  displayBoard(Board
     writeln(PreviousPlayer).
 
 % The game is not over, we play the next turn
-play(Player, Board, 0, Heuristic1, Heuristic2, Winner):-  write('New turn for: '), writeln(Player),
+play(Player, 0, Heuristic1, Heuristic2, Winner):-
+	!,
+	board(Board),
+	findall(M, possibleMove(Board, M), PossibleMoves),
+	(PossibleMoves==[]->
+		true,
+		Winner == '_'
+	;
+		write('New turn for: '), writeln(Player),
 		displayBoard(Board), % print it
 		chooseHeuristic(Heuristic1, Heuristic2, Player, HeuristicChosen),
 		chooseMove(Player, Board, Move, HeuristicChosen), % ask the AI for a move, that is, an index for the Player
 		playMove(Board,Move,NewBoard,Player, IsWinnerMove), % Play the move and get the result in a new Board
+		applyIt(Board, NewBoard),
 		changePlayer(Player,NextPlayer), % Change the player before next turn
-		play(NextPlayer, NewBoard, IsWinnerMove, Heuristic1, Heuristic2, Winner). % next turn!
+		garbage_collect,
+		play(NextPlayer, IsWinnerMove, Heuristic1, Heuristic2, Winner) % next turn!
+	).
+
 
 chooseHeuristic(Heuristic1, _, 'x', Heuristic1).
 chooseHeuristic(_, Heuristic2, 'o', Heuristic2).
 
 %No moves possible
-play(Player, Board, _):-
-	gameover('Draw', Board).
+/*play(Player, _, _):-
+	gameover('Draw', Board).*/
 
 
 %Counts the number of tokens int the specified direction
@@ -169,13 +185,6 @@ nextColumnRow(Row, Column, Direction, NewRow, NewColumn) :-
 	NewColumn is Column+AddColumn.
 
 %%%% Play a Move, the new Board will be the same, but one value will be instanciated with the Move
-playMove(Board, Move, NewBoard, Player) :-
-	length(NewBoard, 7),
-	maplist(length_list(6),NewBoard),
-	copyBoard(Board, NewBoard),
-	nth0(Move, NewBoard, Column),
-	insertToken(Player, Column).
-
 playMove(Board, Move, NewBoard, Player, IsWinnerMove) :-
 	length(NewBoard, 7),
 	maplist(length_list(6),NewBoard),
@@ -249,11 +258,15 @@ copyColumn([],[]).
 %insert token in column
 insertToken(Player, [H|_]) :-
 	var(H),
+	!,
 	H = Player.
 
 insertToken(Player, [H|T]):-
 	nonvar(H),
+	!,
 	insertToken(Player, T).
+
+insertToken(Player, []).
 
 
 %%%% Predicate to get the next player
@@ -285,6 +298,7 @@ printLine(IndexFile, 7, Board).
 %%%% Display the board
 %TODO: recrire sans coder en dur le 0,1,2...
 displayBoard(Board):-
+	!,
     writeln('  0  1  2  3  4  5  6'),
     writeln('*---------------------*'),
     write('|'), printLine(5, Board), write('|'), writeln(''),
@@ -299,8 +313,18 @@ displayBoard(Board):-
 
 length_list(L, Ls) :- length(Ls, L).
 
+init_board:-
+	board(OldBoard),
+	retract(board(OldBoard)),!,
+	length(Board,7), maplist(length_list(6),Board),
+	assert(board(Board)).
+
+init_board:-
+	length(Board,7), maplist(length_list(6),Board),
+	assert(board(Board)).
+
 %%%%% Start the game!
-init :- length(Board,7), maplist(length_list(6),Board), play('x', Board, 0, human, heuristicJoan, _).
+init :- init_board, play('x', 0, human, heuristicJoan, _).
 
 
 

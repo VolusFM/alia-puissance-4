@@ -8,7 +8,7 @@ evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Alpha, Beta, Rec
     BestMove = (Move, 999), !.
 
 evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Alpha, Beta, Record, BestMove, Heuristic):-
-    playMove(Board,Move,NewBoard,Player),
+    playMove(Board,Move,NewBoard,Player, IsWinnerMove),
     changePlayer(Player, NewPlayer),
     MinMax is -MaxMin,
     NewAlpha is -Beta,
@@ -29,7 +29,7 @@ evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Alpha, Beta, Rec
 evaluate_and_choose([], Board, Player, Depth, MaxMin, Alpha, Beta, Record, Record, Heuristic).
 
 alpha_beta(0, Board, Player, MaxMin, Alpha, Beta, Move, Value, Heuristic):-
-	value(Board, ValueBoard, Heuristic),
+	!,value(Board, ValueBoard, Heuristic),
     Value is ValueBoard*MaxMin.
 
 
@@ -38,14 +38,19 @@ alpha_beta(Depth, Board, Player, MaxMin, Alpha, Beta, Move, Value, Heuristic) :-
     Depth > 0,
     %TODO: realation move
     setof(M, possibleMove(Board, M), OrderedMoves),
-    random_permutation(OrderedMoves,Moves), %randomnes added to test ai playing with each other
-    NewDepth is Depth - 1,
-    evaluate_and_choose(Moves, Player, Board, NewDepth, MaxMin, Alpha, Beta, (nil, -1000),
-                        (Move, Value), Heuristic).
+    %random_permutation(OrderedMoves,Moves), %randomnes added to test ai playing with each other
+    (Moves==[]-> %draw
+    	Value is 0
+    ;
+    	NewDepth is Depth - 1,
+    	evaluate_and_choose(Moves, Player, Board, NewDepth, MaxMin, Alpha, Beta, (nil, -1000),
+                        	(Move, Value), Heuristic)
+    ).
+
 
 
 update(Move, Value, (Move1, Value1), (Move1, Value1)):-
-    Value =< Value1.
+    Value =< Value1,!.
 
 update(Move, Value, (Move1, Value1), (Move, Value)) :-
 	Value > Value1.

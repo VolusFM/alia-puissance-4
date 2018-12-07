@@ -8,6 +8,7 @@
 
 %returns the value based on the heuristic
 value(Board, Value, heuristicJoan):-
+	!,
 	findall([Row, Column], areInBoard(Row, Column), Coords),
 	sumValues(Coords,Board, Value).
 
@@ -100,6 +101,7 @@ valueRowColumn( Row, Column, Board, Value) :-
 %(note that the other side of down is up and the other side of left is right, etc...)
 %Finds if placing the TokenThatHas3 would make 4 connected tokens
 has3Conected(TokenThatHas3,Token1, Token2, Nb1, Nb2) :-
+	!,
 	TokenThatHas3 == Token1,
 	Nb1 > 2;
 	TokenThatHas3 = Token2,

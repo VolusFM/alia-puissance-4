@@ -1,15 +1,8 @@
-:-include('connectFour.pl').
-:-include('alphaBetaPruning.pl').
-:-include('minimax.pl').
-:-include('heuristic2.pl').
-:-include('heuristicEvaluation.pl').
-
-
 %Plays a single game using the heuristics specified
 %Result becomes 1 if heuristic1 won and 0 if heuristic2 won
 playSingleGame(Heuristic1, Heuristic2, Result):-
-	length(Board,7), maplist(length_list(6),Board),
-	play('x', Board, 0, Heuristic1, Heuristic2, Winner),
+	init_board,
+	play('x', 0, Heuristic1, Heuristic2, Winner),
 	(Winner == 'x'->
 		Result is 1
 	;Winner == 'o'->
@@ -23,7 +16,9 @@ playSingleGame(Heuristic1, Heuristic2, Result):-
 %Result nb of wins of Heuristic1 - nb of wins of Heuristic2
 playTwoGames(Heuristic1, Heuristic2, Result) :-
 	playSingleGame(Heuristic1, Heuristic2, PartialResult),
+	garbage_collect,
 	playSingleGame(Heuristic2, Heuristic1, PartialResult2),
+	garbage_collect,
 	Result is PartialResult - PartialResult2.
 
 play2NGames(_, _, 0, 0).
