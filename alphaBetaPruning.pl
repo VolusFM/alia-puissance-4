@@ -2,18 +2,18 @@
 %BestMove is the best move in the form (move, value)
 %Record is the best move until now in the form (move, value)
 %TODO: Test
-evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Alpha, Beta, Record, BestMove, Heuristic):-
-    playMove(Board,Move,NewBoard,Player, IsWinnerMove),
+evaluate_and_choose([Move|_], Player, Board, _, _, _, _, _, BestMove, _):-
+    playMove(Board,Move,_,Player, IsWinnerMove),
     IsWinnerMove == 1,
     BestMove = (Move, 999), !.
 
 evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Alpha, Beta, Record, BestMove, Heuristic):-
-    playMove(Board,Move,NewBoard,Player, IsWinnerMove),
+    playMove(Board,Move,NewBoard,Player, _),
     changePlayer(Player, NewPlayer),
     MinMax is -MaxMin,
     NewAlpha is -Beta,
     NewBeta is -Alpha,
-    alpha_beta(Depth, NewBoard, NewPlayer, MinMax, NewAlpha, NewBeta, MoveX, ValueOpponent, Heuristic),
+    alpha_beta(Depth, NewBoard, NewPlayer, MinMax, NewAlpha, NewBeta, _, ValueOpponent, Heuristic),
     MyValue is -ValueOpponent,
     UpdatedAlpha is max(Alpha, MyValue),
     update(Move, MyValue, Record, NewRecord),
@@ -25,19 +25,20 @@ evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Alpha, Beta, Rec
 
 
 %no possible moves to do
-%TODO: implement draw win or lose when no moves
-evaluate_and_choose([], Board, Player, Depth, MaxMin, Alpha, Beta, Record, Record, Heuristic).
+evaluate_and_choose([], _, _, _, _, _, _, Record, Record, _).
 
-alpha_beta(0, Board, Player, MaxMin, Alpha, Beta, Move, Value, Heuristic):-
+alpha_beta(0, Board, _, MaxMin, _, _, _, Value, Heuristic):-
 	!,value(Board, ValueBoard, Heuristic),
     Value is ValueBoard*MaxMin.
 
 
 
+
+
 alpha_beta(Depth, Board, Player, MaxMin, Alpha, Beta, Move, Value, Heuristic) :-
-    Depth > 0,
+    Depth > 0,!,
     %TODO: realation move
-    setof(M, possibleMove(Board, M), OrderedMoves),
+    findall(M, possibleMove(Board, M), OrderedMoves),
     random_permutation(OrderedMoves,Moves), %randomnes added to test ai playing with each other
     (Moves==[]-> %draw
     	Value is 0
@@ -49,10 +50,10 @@ alpha_beta(Depth, Board, Player, MaxMin, Alpha, Beta, Move, Value, Heuristic) :-
 
 
 
-update(Move, Value, (Move1, Value1), (Move1, Value1)):-
+update(_, Value, (Move1, Value1), (Move1, Value1)):-
     Value =< Value1,!.
 
-update(Move, Value, (Move1, Value1), (Move, Value)) :-
+update(Move, Value, (_, Value1), (Move, Value)) :-
 	Value > Value1.
 
 

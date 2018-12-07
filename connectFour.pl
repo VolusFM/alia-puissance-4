@@ -84,26 +84,26 @@ possibleMove(Board, Move) :-
 	nth0(Move, Board, Col),
 	not(isColFull(Col)).
 
-chooseMove('x', Board, Move, human) :-
-	read(Move),
+chooseMove('x', _, Move, human) :-
+	!,read(Move),
 	writeln(Move), writeln('').
 
-chooseMove('o', Board, Move, human) :-
-	read(Move),
+chooseMove('o', _, Move, human) :-
+	!,read(Move),
 	writeln(Move), writeln('').
 
 chooseMove('x', Board, Move, Heuristic) :-
-	alpha_beta(4, Board, 'x', 1, -1000, 1000, Move, Value, Heuristic),
+	!,alpha_beta(4, Board, 'x', 1, -1000, 1000, Move, _, Heuristic),
 	writeln(Move), writeln('').
 
 chooseMove('o', Board, Move, Heuristic) :-
-	alpha_beta(4, Board, 'o', -1, -1000, 1000, Move, Value, Heuristic),
+	!,alpha_beta(4, Board, 'o', -1, -1000, 1000, Move, _, Heuristic),
 	writeln(Move), writeln('').
 
 
 %%%% Recursive predicate for playing the game.
 % The game is over, we use a cut to stop the proof search, and display the winner/board.
-play(Player, 1, Heuristic1, Heuristic2, Winner):-  !, board(Board),  displayBoard(Board),
+play(Player, 1, _, _, Winner):-  !, board(Board),  displayBoard(Board),
     writeln(''),
     write('Game is Over. Winner: '),
     changePlayer(Player, PreviousPlayer),
@@ -117,7 +117,7 @@ play(Player, 0, Heuristic1, Heuristic2, Winner):-
 	findall(M, possibleMove(Board, M), PossibleMoves),
 	(PossibleMoves==[]->
 		true,
-		Winner == '_'
+		Winner = '_'
 	;
 		write('New turn for: '), writeln(Player),
 		displayBoard(Board), % print it
@@ -169,7 +169,7 @@ countTokensDirection(Board, Direction, Token, Row, Column, NbTokens) :-
 	).
 
 %When the last function fails it means that Row column is outside the board, so it sends 0
-countTokensDirection(Board, Direction, Token, Row, Column, 0).
+countTokensDirection(_, _, _, _, _, 0).
 
 %Checks if the row and column are inside the boundaries of the board
 areInBoard(Row, Column) :-
@@ -224,14 +224,14 @@ isWinner(Column, Row, Player, Board, IsWinnerMove):-
 
 
 getLastRowPlayed([], Row):-
+	Row is -1,!.
+
+getLastRowPlayed([H | _], Row):-
+	var(H),!,
 	Row is -1.
 
-getLastRowPlayed([H | T], Row):-
-	var(H),
-	Row is -1.
 
-
-getLastRowPlayed([H | T], Row) :-
+getLastRowPlayed([_ | T], Row) :-
 	getLastRowPlayed(T, RowTail),
 	Row is RowTail+1.
 
@@ -248,7 +248,7 @@ copyColumn([H|T],[NewH|NewT]):-
 	copyColumn(T,NewT).
 
 
-copyColumn([H|T],[NewH|NewT]):-
+copyColumn([H|_],[_|_]):-
 	var(H).
 
 copyColumn([],[]).
@@ -266,7 +266,7 @@ insertToken(Player, [H|T]):-
 	!,
 	insertToken(Player, T).
 
-insertToken(Player, []).
+insertToken(_, []).
 
 
 %%%% Predicate to get the next player
@@ -288,12 +288,12 @@ printLine(IndexFile, IndexColonne,  Board) :-
     printLine(IndexFile, NewIndexColonne, Board).
 
 printLine(IndexFile, IndexColonne,  Board) :-
-    nth0(IndexColonne,Board,Col0), nth0(IndexFile,Col0,Val),
+    nth0(IndexColonne,Board,Col0), nth0(IndexFile,Col0,_),
     write(' '), write('-'), write(' '),
     NewIndexColonne is IndexColonne+1,
     printLine(IndexFile, NewIndexColonne, Board).
 
-printLine(IndexFile, 7, Board).
+printLine(_, 7, _).
 
 %%%% Display the board
 %TODO: recrire sans coder en dur le 0,1,2...
