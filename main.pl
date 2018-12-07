@@ -1,3 +1,4 @@
+:- discontiguous(value/3).
 :-include('connectFour.pl').
 :-include('alphaBetaPruning.pl').
 :-include('heuristic2.pl').
