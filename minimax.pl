@@ -1,7 +1,6 @@
 %Choose best move from the actual position searching Depth turns
 %BestMove is the best move in the form (move, value)
 %Record is the best move until now in the form (move, value)
-%TODO: Test
 evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Record, BestMove):-
     playMove(Board,Move,NewBoard,Player, IsWinnerMove),
     IsWinnerMove == 1,
@@ -17,14 +16,11 @@ evaluate_and_choose([Move|Moves], Player, Board, Depth, MaxMin, Record, BestMove
     evaluate_and_choose(Moves, Player, Board, Depth, MaxMin, NewRecord, BestMove).
 
 %no possible moves to do
-%TODO: implement draw win or lose when no moves
 evaluate_and_choose([], Board, Player, Depth, MaxMin, Record, Record).
 
 minimax(0, Board, Player, MaxMin, Move, Value):-
 	value(Board, ValueBoard),
-    Value is ValueBoard*MaxMin.
-
-
+    Value is ValueBoard * MaxMin.
 
 minimax(Depth, Board, Player, MaxMin, Move, Value) :-
     Depth > 0,

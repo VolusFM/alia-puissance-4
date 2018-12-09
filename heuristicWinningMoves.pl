@@ -7,7 +7,7 @@
 
 
 %returns the value based on the heuristic
-value(Board, Value, heuristicJoan):-
+value(Board, Value, heuristicWinningMoves):-
 	!,
 	findall([Row, Column], areInBoard(Row, Column), Coords),
 	sumValues(Coords,Board, Value).
@@ -19,7 +19,6 @@ sumValues([[Row, Column] | T], Board, Value) :-
 	sumValues(T, Board, ValueRest),
 	valueRowColumn(Row, Column, Board, ValueThis),
 	Value is ValueRest + ValueThis.
-
 
 
 %Returns the value of the slot defined by Row, Column
@@ -94,7 +93,7 @@ valueRowColumn( Row, Column, Board, Value) :-
 	nth0(Row, ColumnElement, Element),
 	valueFullSlot(Row, Column, Element, Board, ValuePosSlot),
 	modifier(Element, Modifier),
-	Value is ValuePosSlot*Modifier,
+	Value is ValuePosSlot * Modifier,
 	!.
 
 %From the number of tokens connected in one side and the number connected of tokens to the other side

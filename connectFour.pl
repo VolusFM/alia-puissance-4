@@ -1,8 +1,8 @@
-% the game will be reprensented by 7 lists of 6 elements
+% The game will be reprensented by 7 lists of 6 elements
 % board(column1, column2, colmun3, column4, column5, column6, column7)
-% column1(_,_,_,_,_,_) at the beginning, idem for the other columns
-% eg column1(x,_,_,_,_,_) after the first round
-% eg column1(x,o,_,_,_,_) after the second round
+% column1(_, _, _, _, _, _) at the beginning, idem for the other columns
+% e.g. column1(x, _, _, _, _, _) after the first round
+% e.g. column1(x, o, _, _, _, _) after the second round
 % until the board is completely instanciated or someone wins
 
 :- dynamic board/1.
@@ -14,34 +14,33 @@ gameover(Winner, Board) :- winner(Board, Winner), !. % There exists a winning co
 gameover('Draw', Board) :- isBoardFull(Board). % the Board is fully instanciated (no free variable): Draw.
 
 %%%% Recursive predicate that checks if all the elements of the List (a board)
-%%%% are instanciated: true e.g. for [x,x,o,o,x,o] false for
-%%%% [x,x,o,o,_G125,x]
+%%%% are instanciated: e.g. true for [x,x,o,o,x,o] false for
+%%%% [x, x, o, o, _, x]
 isColFull([]).
 isColFull([H|T]):- nonvar(H), isColFull(T).
 
 % B needs to have 7 elements
 isBoardFull(B):-
-    nth0(0,B,Col0), isColFull(Col0),
-    nth0(1,B,Col1), isColFull(Col1),
-    nth0(2,B,Col2), isColFull(Col2),
-    nth0(3,B,Col3), isColFull(Col3),
-    nth0(4,B,Col4), isColFull(Col4),
-    nth0(5,B,Col5), isColFull(Col5),
-    nth0(6,B,Col6), isColFull(Col6).
+    nth0(0, B, Col0), isColFull(Col0),
+    nth0(1, B, Col1), isColFull(Col1),
+    nth0(2, B, Col2), isColFull(Col2),
+    nth0(3, B, Col3), isColFull(Col3),
+    nth0(4, B, Col4), isColFull(Col4),
+    nth0(5, B, Col5), isColFull(Col5),
+    nth0(6, B, Col6), isColFull(Col6).
 
-%%%% Winning condition
-winner(Board,Winner) :- fourVertical(Board, Winner).
-winner(Board,Winner) :- fourHorizontal(Board, Winner).
-winner(Board,Winner) :- fourDiagonalUp(Board, Winner).
-winner(Board,Winner) :- fourDiagonalDown(Board, Winner).
-
+%%%% Win conditions
+winner(Board, Winner) :- fourVertical(Board, Winner).
+winner(Board, Winner) :- fourHorizontal(Board, Winner).
+winner(Board, Winner) :- fourDiagonalUp(Board, Winner).
+winner(Board, Winner) :- fourDiagonalDown(Board, Winner).
 
 %%%% Test if there is column with four adjacent tokens of the same color
-%P='o'
-%Board=[[_ _ _ _],[_ _ _]]
+% P = 'o'
+% Board=[[_ _ _ _], [_ _ _]]
 fourVertical(Board, P):-
     append(_, [C|_], Board),
-    append(_, [A,B,D,E|_], C),
+    append(_, [A, B, D, E|_], C),
     A==P, B==P, D==P, E==P.
 
 %%%% Test if there are four columns with a line of four adjacent tokens of the same color.
@@ -60,7 +59,7 @@ fourDiagonalDown(Board, P):- append(_, [C1, C2, C3, C4|_], Board),
     append(_, [D|X3], C3),
     append(_, [E|X4], C4),
     A==P, B==P, D==P, E==P,
-    length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1+1, L3 is L1+2, L4 is L1+3.
+    length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1 + 1, L3 is L1 + 2, L4 is L1 + 3.
 
 %%%%% Test if there are four columns with a diagonal of four adjacent tokens of the same color (going up).
 fourDiagonalUp(Board, P):- append(_,[C1, C2, C3, C4|_], Board),
@@ -69,7 +68,7 @@ fourDiagonalUp(Board, P):- append(_,[C1, C2, C3, C4|_], Board),
     append(_, [D|X3], C3),
     append(_, [E|X4], C4),
     A==P, B==P, D==P, E==P,
-length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1-1, L3 is L1-2, L4 is L1-3.
+length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1 - 1, L3 is L1 - 2, L4 is L1 - 3.
 
 
 %%%% Artificial intelligence: choose in a Board the index to play for Player (_)
@@ -78,32 +77,36 @@ length(X1, L1), length(X2, L2), length(X3, L3), length(X4, L4), L2 is L1-1, L3 i
 ia(Board, Index) :-
 	repeat, Index is random(7),
 	nth0(Index, Board, Col),
-	not(isColFull(Col)),!.
+	not(isColFull(Col)), !.
 
+% Check if a move is possible.
 possibleMove(Board, Move) :-
 	nth0(Move, Board, Col),
 	not(isColFull(Col)).
 
+% Chose a move for x as human.
 chooseMove('x', _, Move, human) :-
-	!,read(Move),
+	!, read(Move),
 	writeln(Move), writeln('').
 
+% Chose a move for o as human.
 chooseMove('o', _, Move, human) :-
-	!,read(Move),
+	!, read(Move),
 	writeln(Move), writeln('').
 
+% Chose a move for x as an AI.
 chooseMove('x', Board, Move, Heuristic) :-
-	!,alpha_beta(4, Board, 'x', 1, -1000, 1000, Move, _, Heuristic),
+	!, alpha_beta(4, Board, 'x', 1, -1000, 1000, Move, _, Heuristic),
 	writeln(Move), writeln('').
-
+	
+% Chose a move for o as an AI.
 chooseMove('o', Board, Move, Heuristic) :-
-	!,alpha_beta(4, Board, 'o', -1, -1000, 1000, Move, _, Heuristic),
+	!, alpha_beta(4, Board, 'o', -1, -1000, 1000, Move, _, Heuristic),
 	writeln(Move), writeln('').
 
-
-%%%% Recursive predicate for playing the game.
-% The game is over, we use a cut to stop the proof search, and display the winner/board.
-play(Player, 1, _, _, Winner):-  !, board(Board),  displayBoard(Board),
+%%%% Recursive predicate to play the game.
+% The game is over, we use a cut to stop the proof search, and display the winner / board.
+play(Player, 1, _, _, Winner):-  !, board(Board), displayBoard(Board),
     writeln(''),
     write('Game is Over. Winner: '),
     changePlayer(Player, PreviousPlayer),
@@ -130,14 +133,8 @@ play(Player, 0, Heuristic1, Heuristic2, Winner):-
 		play(NextPlayer, IsWinnerMove, Heuristic1, Heuristic2, Winner) % next turn!
 	).
 
-
 chooseHeuristic(Heuristic1, _, 'x', Heuristic1).
 chooseHeuristic(_, Heuristic2, 'o', Heuristic2).
-
-%No moves possible
-/*play(Player, _, _):-
-	gameover('Draw', Board).*/
-
 
 %Counts the number of tokens int the specified direction
 countTokensDirection(Board, Direction, Token, Row, Column, NbTokens) :-
@@ -151,10 +148,10 @@ countTokensDirection(Board, Direction, Token, Row, Column, NbTokens) :-
 		(var(Element)->
 			NbTokens is 0,
 			fail
-		;%else
+		; %else
 			Token = Element
 		)
-	;%else
+	; %else
 		true
 	)
 	,
@@ -222,7 +219,7 @@ isWinner(Column, Row, Player, Board, IsWinnerMove):-
 		IsWinnerMove is 0
 	).
 
-
+	
 getLastRowPlayed([], Row):-
 	Row is -1,!.
 
@@ -230,12 +227,11 @@ getLastRowPlayed([H | _], Row):-
 	var(H),!,
 	Row is -1.
 
-
 getLastRowPlayed([_ | T], Row) :-
 	getLastRowPlayed(T, RowTail),
 	Row is RowTail+1.
 
-
+	
 copyBoard([],[]).
 
 copyBoard([C | Board], [NewC | NewBoard]):-
@@ -247,12 +243,10 @@ copyColumn([H|T],[NewH|NewT]):-
 	NewH = H,
 	copyColumn(T,NewT).
 
-
 copyColumn([H|_],[_|_]):-
 	var(H).
 
 copyColumn([],[]).
-
 
 
 %insert token in column
@@ -268,10 +262,10 @@ insertToken(Player, [H|T]):-
 
 insertToken(_, []).
 
-
 %%%% Predicate to get the next player
 changePlayer('x','o').
 changePlayer('o','x').
+
 
 %%%% Print the value of the colomns at index N:
 %%%% Print the line at index
@@ -296,7 +290,6 @@ printLine(IndexFile, IndexColonne,  Board) :-
 printLine(_, 7, _).
 
 %%%% Display the board
-%TODO: recrire sans coder en dur le 0,1,2...
 displayBoard(Board):-
 	!,
     writeln('  0  1  2  3  4  5  6'),
@@ -310,7 +303,7 @@ displayBoard(Board):-
     writeln('*---------------------*'),
     writeln('  0  1  2  3  4  5  6').
 
-
+	
 length_list(L, Ls) :- length(Ls, L).
 
 init_board:-
@@ -324,9 +317,4 @@ init_board:-
 	assert(board(Board)).
 
 %%%%% Start the game!
-init :- init_board, play('x', 0, human, heuristicJoan, _).
-
-
-
-
-
+init :- init_board, play('x', 0, human, heuristicWinningMoves, _).
